@@ -234,6 +234,13 @@
         }
 
     }
+
+    #imagePreview {
+        max-width: 100%; /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
+        max-height: 100%; /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
+        height: auto; /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
+    }
+    
 </style>
 
 
@@ -422,17 +429,20 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="/posts/create" method="POST">
-                            <div class="mb-3">
-                                <textarea name="content" id="postContent" class="form-control"
-                                    placeholder="What's on your mind?" rows="3"></textarea>
-                            </div>
+                        <div id="imagePreviewContainer">
+                            <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                        </div>
+                        <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageUpload" name="imageUpload" accept="image/jpeg,image/gif,image/png" style="display: none;" onchange="previewImage()">
+                            <label for="imageUpload" class="btn btn-primary">Upload Image</label>
+                            <textarea name="content" id="postContent" class="form-control" placeholder="What's on your mind?" rows="3"></textarea>
                             <button type="submit" class="btn btn-primary">Submit Post</button>
-                        </form>
+                        </form>                        
                     </div>
                 </div>
             </div>
         </div>
+
 
         <script>
 
@@ -460,7 +470,23 @@
                 }
             });
 
+             // 이미지를 미리보기하기 위해 요소 가져오기
+            var imageUpload = document.getElementById('imageUpload');
+            var imagePreview = document.getElementById('imagePreview');
 
+            // 이미지를 미리보기하는 함수
+            function previewImage() {
+                if (imageUpload.files.length > 0) {
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                        imagePreview.src = reader.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(imageUpload.files[0]);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            }
         </script>
 
         <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -471,7 +497,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
+        
 
         <!-- Option 2: Separate Popper and Bootstrap JS -->
         <!--
