@@ -257,8 +257,10 @@
                 <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
                     data-bs-toggle="modal" data-bs-target="#createPostModal">add_box</span>
 
+                <!--좋아요 누른 게시글 확인 아이콘-->
+                <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
+                    data-bs-toggle="modal" data-bs-target="#likedPostsModal">favorite_border</span>
 
-                <span style="margin: 0 12px 0 12px;" class="material-icons-outlined">favorite_border</span>
                 <a href="/logout"><span style="margin: 6px 12px 0 12px;"
                         class="material-icons-outlined">logout</span></a>
                 <div class="mini-profile" style="float: right; margin-left: 10px;">
@@ -319,7 +321,8 @@
                         <br>
                         Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
                     </div>
-                    <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span></div>
+                    <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
+                    </div>
                 </div>
                 <!-- <div style="margin-left: 10px;">
                     <div>
@@ -335,7 +338,7 @@
                     </div>
                     <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span></div>
                 </div> -->
-                
+
             </div>
             {% endfor %}
 
@@ -464,6 +467,34 @@
             </div>
         </div>
 
+        <!-----------(좋아요 누른 게시글 확인)모달------------------------------------------------------------------------------------------------------>
+        <!-- 좋아요 누른 게시글 확인 모달 -->
+        <div class="modal fade" id="likedPostsModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="likedPostsModalLabel">Liked Posts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            <!-- 좋아요를 누른 게시글 목록을 여기에 표시 -->
+                            {% for post in posts %}
+                                {% if post.id in likes %}
+                                    <li><strong>{{ post.user.username }}</strong>&nbsp;<span style="font-weight: lighter">{{ post.content }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <script>
 
             // 모달 열기
@@ -492,7 +523,7 @@
 
 
         </script>
-        
+
         <!-- 수정사항 변경 -->
         <script>
             // 좋아요 버튼 클릭 시
