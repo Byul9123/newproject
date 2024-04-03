@@ -51,6 +51,7 @@
         height: 119px;
         border: solid 1px #dbdbdb;
         display: flex;
+
         border-radius: 2px;
         justify-content: space-around;
         background-color: white;
@@ -142,45 +143,6 @@
         color: black;
     }
 
-    .modal-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        z-index: 1;
-        background-color: rgba(0, 0, 0, 0.4);
-        animation: showText1 0.5s;
-    }
-
-    .modal_body {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 400px;
-        height: 150px;
-        text-align: center;
-        background-color: rgb(255, 255, 255);
-        border-radius: 10px;
-        box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
-        transform: translateX(-50%) translateY(-50%);
-        font-size: 13px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
-        line-height: 50px;
-    }
-
-    .modal-text {
-        border-bottom: 0;
-        border-left: 0;
-        border-right: 0;
-        border-top: 1px solid #dbdbdb;
-        border-bottom: 1px solid #dbdbdb;
-        background-color: white;
-    }
-
     @keyframes showText1 {
         from {
             transform: translateX(0px);
@@ -234,6 +196,19 @@
         }
 
     }
+  
+  .cherry-blossom-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 700px;
+        /* 이미지의 높이에 따라 조정 */
+        background: url('../static/image/footerBG.png') no-repeat center bottom;
+        background-size: cover;
+        z-index: -1;
+        /* 필요에 따라 조정 */
+    }
 </style>
 
 
@@ -273,6 +248,7 @@
                 <button type="button" class="btn btn-secondary" data-toggle="modal"
                     data-target="#registerModal">Register</button>
                 {% endif %}
+
             </div>
         </div>
     </nav>
@@ -280,10 +256,10 @@
     <div style="display: flex; flex-direction: row; position: relative; justify-content: center; top: 85px;">
         <!----------------왼 쪽메인화면창--------------------------------------------------------------------------------->
         <div class="cLayer"
-            style="max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: relative; font-size: 13px; font-weight: bold;">
+            style="max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: absolute; font-size: 13px; font-weight: bold;">
             <!-- 포스트 목록 반복 -->
             {% for post in posts %}
-            <div class="feed-box">
+            <div class="feed-box" id="post_{{ post.id }}">
                 <!-- 포스트 상단 정보 -->
                 <div
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 2%; margin-left: 1%; margin-bottom: 2%;">
@@ -299,11 +275,18 @@
                     </div>
                     <div>
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
-                            <span class="material-icons-outlined" style="margin-right: 15px;">more_horiz</span>
+                            <span class="material-icons-outlined" style="margin-right: 15px;"
+                                data-post-id="{{ post.id }}">edit</span>
+                            <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
+                                data-post-id="{{ post.id }}">delete</span>
+
                         </button>
                     </div>
                 </div>
                 <!-- 포스트 내용 -->
+                <div style="margin-left: 10px;">
+                    <div>Likes: {{ post.likes }}</div>
+                    <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
                 <!-- 수정사항 변경 -->
                 <div style="margin-left: 10px;">
                     <div>
@@ -324,64 +307,12 @@
                     <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
                     </div>
                 </div>
-                <!-- <div style="margin-left: 10px;">
-                    <div>
-                        <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
-                            {% if post.id in session.liked_posts %}
-                                <span class="material-icons-outlined like-icon" style="color: red;">favorite</span>
-                            {% else %}
-                                <span class="material-icons-outlined like-icon" style="color: black;">favorite_border</span>
-                            {% endif %}
-                        </button>
-                        <br>
-                        Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
-                    </div>
-                    <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span></div>
-                </div> -->
-
             </div>
             {% endfor %}
 
         </div>
 
 
-        <!--------------------    오른쪽단 피드창-------------------------------------------------------------------------------->
-        <!-- <div class="bLayer"
-            style="max-width: 350px; width: 100%; max-height: 800px; height: 100%; position:sticky; top: 85px; margin-left: 24px;">
-            <div style="margin-top: 8%; margin-left: 1%; margin-bottom: 2%;">
-
-                <form action="/posts/create" method="POST"
-                    style="align-items: center; display: flex; flex-direction: column;">
-                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
-                        Create a Post
-                    </div>
-                    <textarea name="content" id="postContent" placeholder="What's on your mind?"
-                        style="width: 90%; height: 150px; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;"></textarea>
-                    <button type="submit"
-                        style="padding: 10px 20px; font-size: 14px; color: white; background-color: cornflowerblue; border: none; border-radius: 5px; cursor: pointer;">
-                        Submit Post
-                    </button>
-                </form>
-            </div>
-        </div> -->
-
-
-        <!-----------(...)모달------------------------------------------------------------------------------------------------------>
-        <div id="modal-option" class="modal-overlay">
-            <div id="modal-script" class="modal_body">
-                <button
-                    style="color:red; font-weight: bold; background-color: white; margin-top: -20px; border: none; border-radius: 10px;">
-                    게시물 삭제
-                </button>
-                <button class="modal-text">
-                    프로필 보기
-                </button>
-                <button id="close-modal" class="close-area"
-                    style="background-color: white; border: none; border-radius: 10px;">
-                    취소
-                </button>
-            </div>
-        </div>
 
         <!-----------(로그인)모달------------------------------------------------------------------------------------------------------>
         <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
@@ -411,6 +342,9 @@
                 </div>
             </div>
         </div>
+
+        
+
         <!-----------(회원가입)모달------------------------------------------------------------------------------------------------------>
 
         <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel"
@@ -439,28 +373,7 @@
                                     required>
                             </div>
                             <button type="submit" class="btn btn-primary">Register</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
-        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createPostModalLabel">Create a Post</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="/posts/create" method="POST">
-                            <div class="mb-3">
-                                <textarea name="content" id="postContent" class="form-control"
-                                    placeholder="What's on your mind?" rows="3"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit Post</button>
                         </form>
                     </div>
                 </div>
@@ -489,13 +402,57 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      
+        <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
+        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPostModalLabel">Create a Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="imagePreviewContainer">
+                            <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                        </div>
+                        <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageUpload" name="imageUpload" accept="image/jpeg,image/gif,image/png" style="display: none;" onchange="previewImage()">
+                            <label for="imageUpload" class="btn btn-primary">Upload Image</label>
+                            <textarea name="content" id="postContent" class="form-control" placeholder="What's on your mind?" rows="3"></textarea>
+                            <button type="submit" class="btn btn-primary">Submit Post</button>
+                        </form>                        
                     </div>
                 </div>
             </div>
         </div>
 
-
         <script>
+
+            document.addEventListener('DOMContentLoaded', function () {
+                //삭제
+                const deleteButtons = document.querySelectorAll('.delete-post-btn');
+                deleteButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+                        if (confirm('이 게시물을 삭제하시겠습니까?')) {
+                            deletePost(postId);
+                        }
+                    });
+                });
+
+                //수정
+                document.querySelectorAll('.edit-post-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+                        // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+                        // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+                        // 'Submit' 버튼 클릭 시 editPost 함수 호출
+                        // 
+                    });
+                });
+            });
+
 
             // 모달 열기
             const modal = document.getElementById("modal-option");
@@ -520,6 +477,7 @@
                     document.body.style.overflowY = "visible";
                 }
             });
+
 
 
         </script>
@@ -552,6 +510,71 @@
                     }
                 });
             });
+
+             // 이미지를 미리보기하기 위해 요소 가져오기
+            var imageUpload = document.getElementById('imageUpload');
+            var imagePreview = document.getElementById('imagePreview');
+
+            // 이미지를 미리보기하는 함수
+            function previewImage() {
+                if (imageUpload.files.length > 0) {
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                        imagePreview.src = reader.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(imageUpload.files[0]);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            }
+
+            function deletePost(postId) {
+                console.log(postId)
+                fetch(`/posts/delete/${postId}`, {
+                    method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
+                            document.querySelector(`#post_${postId}`).remove();
+
+                        } else {
+                            alert('게시물을 삭제하지 못했습니다.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function editPost(postId, updatedContent) {
+                fetch(`/posts/edit/${postId}`, {
+                    method: 'PATCH',  // PATCH 메소드 사용
+                    headers: {
+                        'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+                    },
+                    body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 성공적으로 수정되었을 때의 처리 로직
+                            alert('Post updated successfully');
+                            // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+                        } else {
+                            // 오류 처리
+                            alert('Failed to update post');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+
         </script>
 
         <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -569,6 +592,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 -->
+        <canvas id="blossomCanvas"></canvas>
+        <script src="{{ url_for('static', filename='blossom.js') }}"></script>
+
+        <footer class="cherry-blossom-footer">
+            <!-- 푸터 내용, 필요한 경우 -->
+        </footer>
 </body>
 
 </html>
