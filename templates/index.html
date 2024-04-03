@@ -1,629 +1,512 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>페이지 제목</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+    <!-- 부트스트랩 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <!--    구글 머터리얼 아이콘   -->
+    <link
+        href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+        rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
-        @font-face {
-            font-family: 'Cafe24Ohsquare';
-            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/Cafe24Ohsquare.woff') format('woff');
-            font-weight: normal;
-            font-style: normal;
-        }
+    <link rel="stylesheet"
+        href="https://fonts.sandbox.google.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!--    jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-        body {
-            font-family: 'Cafe24Ohsquare';
-            margin: 0;
-            padding: 0;
-            background-image: url("{{ url_for('static', filename='image/wall.jpg') }}");
-        }
 
-        header {
-            display: flex;
-            align-items: baseline;
-            justify-content: center;
-            margin-left: 0px;
-            margin-top: 30px;
-        }
-
-        .small {
-            /*헤더 안에있는 작은 글씨*/
-            margin: 0;
-            font-size: 48px;
-            color: #212121;
-            margin-bottom: 10px;
-            transform: translateY(14px);
-        }
-        .big {
-            /*헤더 안에있는 큰 글씨*/
-            font-size: 145px;
-            margin: 0;
-            padding: 0;
-            color: #212121;
-            transform: translateY(50px);
-        }
-
-        main {
-            display: flex;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        .person {
-            position: relative;
-            margin: 10px;
-            cursor: pointer;
-        }
-
-        .person img {
-            width: 216px;
-            height: 418px;
-            border-radius: 5px;
-        }
-
-        .heart {
-            position: absolute;
-            bottom: -20px;
-            /* 조정된 값 */
-            left: 0px;
-            /* 조정된 값 */
-            display: flex;
-            align-items: center;
-        }
-
-        .heart i {
-            color: #dd1725;
-            margin-right: 5px;
-        }
-
-        .heart p {
-            margin: 0;
-            color: #212121;
-            font-size: 18px;
-        }
-
-        .box {
-            /*방명록 박스 전체*/
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .box1 p,
-        .box2 p,
-        .box3 p,
-        .box4 p,
-        .box5 p {
-            /*방명록 안에 있는 글씨들*/
-            color: #212121;
-            font-size: 25px;
-            padding-left: 10px;
-            padding-top: 8px;
-            margin: 0;
-        }
-
-        .box1 {
-            /*방명록 박스*/
-            background-color: rgba(173, 173, 173, 0.3);
-            width: 215px;
-            height: 309px;
-            border-radius: 5px;
-            justify-content: center;
-            margin: 0 10px;
-        }
-
-        .box2 {
-            /*방명록 박스*/
-
-            background-color: rgba(173, 173, 173, 0.3);
-            width: 215px;
-            height: 309px;
-            border-radius: 5px;
-            justify-content: center;
-            margin: 0 10px;
-        }
-
-        .box3 {
-            /*방명록 박스*/
-
-            background-color: rgba(173, 173, 173, 0.3);
-            width: 215px;
-            height: 309px;
-            border-radius: 5px;
-            justify-content: center;
-            margin: 0 10px;
-        }
-
-        .box4 {
-            /*방명록 박스*/
-
-            background-color: rgba(173, 173, 173, 0.3);
-            width: 215px;
-            height: 309px;
-            border-radius: 5px;
-            justify-content: center;
-            margin: 0 10px;
-        }
-
-        .box5 {
-            /*방명록 박스*/
-
-            background-color: rgba(173, 173, 173, 0.3);
-            width: 215px;
-            height: 309px;
-            border-radius: 5px;
-            justify-content: center;
-            margin: 0 10px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.8);
-            /*투명도 변경*/
-        }
-
-        .modal-content {
-            margin: 205px auto;
-            /*밑으로 내리면 어떨까? 사진 높이에 맞게*/
-            background-color: #fefefe;
-            border-radius: 10px;
-            padding: 20px;
-            max-width: 600px;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* modal 창 이미지 크기 조절 */
-
-        .modal_box {
-            display: flex;
-            justify-content: space-around;
-            height: 90%;
-        }
-
-        .modal_person img {
-            height: auto;
-        }
-
-        .profile {
-            font-family: 'Cafe24Ohsquare', sans-serif;
-            /* Cafe24Ohsquare 글꼴 먼저 시도하고, 실패 시 sans-serif 글꼴 사용 */
-        }
-
-        .guestbook-form input[type="text"] {
-            flex: 1;
-            /* 텍스트 입력창 너비를 조금 더 크게 설정 */
-            padding: 10px;
-            font-size: 16px;
-            margin-right: 10px;
-            margin-top: -20px;
-            background-color: rgba(173, 173, 173, 0.4);
-            border-radius: 5px;
-            border-color: rgba(173, 173, 173, 0.4);
-            font-family: 'Cafe24Ohsquare'
-        }
-
-        /* '작성' 버튼 스타일 */
-        .guestbook-form button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #b1b9bec7;
-            color: #000000;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 40px;
-            margin-top: -22px;
-            font-family: 'Cafe24Ohsquare';
-            width: 70px;
-        }
-
-        .guestbook-form {
-            display: flex;
-            /* 요소들을 가로로 나란히 배치하기 위해 flex 사용 */
-            align-items: center;
-            /* 요소들을 세로 중앙에 정렬 */
-        }
-
-        /* 텍스트 입력 칸과 버튼을 감싸는 div 요소의 스타일 */
-        .input-with-button {
-            display: flex;
-            align-items: center;
-        }
-
-        /* 하트 마우스 포인터 설정 */
-        .heart-text {
-            cursor: pointer;
-        }
-
-        .modal_person_L {
-            display: flex;
-            flex-wrap: wrap;
-            flex-direction: column;
-            align-content: center;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .modal_person_L p {
-            margin: 10px
-        }
-
-        .a-link {
-            text-decoration: none; /* 링크의 밑줄 제거 */
-            color: inherit; /* 링크의 색상 제거 */
-        }
-
-        /* 글꼴 변경 */
-    </style>
-    <!-- 기타 CSS 파일 -->
-    <link href="styles.css" rel="stylesheet">
+    <title>팀명없음</title>
 </head>
+<style>
+    /*메뉴바 우측 상단 미니프로필*/
+    .mini-profile {
+        width: 24px;
+        height: 24px;
+        border-radius: 70%;
+        overflow: hidden;
+    }
 
-<body>
-    <header>
-        <p class="small">포기하지 말고,계속 도전하자!<br>처음이어도, 잘 못해도 우리는</p>
-        <p class="big">할 수 있조</p>    
-    </header>
-    <main>
-        <div class="person" onclick="showModal('person1')">
-            <img src="{{ url_for('static', filename='image/team1.jpg') }}" alt="한승주">
-            <div class="heart">
-                <i class="bi bi-suit-heart-fill"></i>
-                <!-- DB 데이터 목록에서 해당 프로필 좋아요 수 가져오기 -->
-                {% for em in data %}
-                {% if em.person_id == 1 %}
-                <p> {{ em.person_like }} </p>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <div class="person" onclick="showModal('person2')">
-            <img src="{{ url_for('static', filename='image/team3.jpg') }}" alt="김용형">
-            <div class="heart">
-                <i class="bi bi-suit-heart-fill"></i>
-                <!-- DB 데이터 목록에서 해당 프로필 좋아요 수 가져오기 -->
-                {% for em in data %}
-                {% if em.person_id == 2 %}
-                <p> {{ em.person_like }} </p>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <div class="person" onclick="showModal('person3')">
-            <img src="{{ url_for('static', filename='image/team2.jpg') }}" alt="김현우">
-            <div class="heart">
-                <i class="bi bi-suit-heart-fill"></i>
-                <!-- DB 데이터 목록에서 해당 프로필 좋아요 수 가져오기 -->
-                {% for em in data %}
-                {% if em.person_id == 3 %}
-                <p> {{ em.person_like }} </p>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <div class="person" onclick="showModal('person4')">
-            <img src="{{ url_for('static', filename='image/team4.jpeg') }}" alt="장석천">
-            <div class="heart">
-                <i class="bi bi-suit-heart-fill"></i>
-                <!-- DB 데이터 목록에서 해당 프로필 좋아요 수 가져오기 -->
-                {% for em in data %}
-                {% if em.person_id == 4 %}
-                <p> {{ em.person_like }} </p>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-        <div class="person" onclick="showModal('person5')">
-            <img src="{{ url_for('static', filename='image/team5.jpg') }}" alt="이정호">
-            <div class="heart">
-                <i class="bi bi-suit-heart-fill"></i>
-                <!-- DB 데이터 목록에서 해당 프로필 좋아요 수 가져오기 -->
-                {% for em in data %}
-                {% if em.person_id == 5 %}
-                <p> {{ em.person_like }} </p>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-    </main>
+    /*스토리 라인 프로필*/
+    .story-profile {
+        width: 65px;
+        height: 65px;
+        border-radius: 70%;
+        position: relative;
+        border: 3px solid transparent;
+        background-image: linear-gradient(#fff, #fff),
+            linear-gradient(to left, #b347ab, #d42694, orange 100%);
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+        /*overflow: hidden;*/
+    }
 
-    <!-- 방명록창 -->
-    <div class="box">
-        <div class="box1">
-            {% for element in book %}
-            {% if element.person_id == 1 %}
-            <p> {{ element.book_text }} </p>
-            {% endif %}
-            {% endfor %}
-        </div>
+    /*스토리 박스*/
+    .story-box {
+        height: 119px;
+        border: solid 1px #dbdbdb;
+        display: flex;
 
-        <div class="box2">
-            {% for element in book %}
-            {% if element.person_id == 2 %}
-            <p> {{ element.book_text }} </p>
-            {% endif %}
-            {% endfor %}
-        </div>
+        border-radius: 2px;
+        justify-content: space-around;
+        background-color: white;
+        font-weight: lighter;
+        font-size: 11px;
+        color: #696868;
+        text-align: center;
+    }
 
-        <div class="box3">
-            {% for element in book %}
-            {% if element.person_id == 3 %}
-            <p> {{ element.book_text }} </p>
-            {% endif %}
-            {% endfor %}
-        </div>
+    .story-name {
+        margin-top: 5px;
+    }
 
-        <div class="box4">
-            {% for element in book %}
-            {% if element.person_id == 4 %}
-            <p> {{ element.book_text }} </p>
-            {% endif %}
-            {% endfor %}
-        </div>
+    /*피드박스 좌측 상단 미니프로필*/
+    .box-profile {
+        width: 30px;
+        height: 30px;
+        border-radius: 70%;
+        overflow: hidden;
+    }
 
-        <div class="box5">
-            {% for element in book %}
-            {% if element.person_id == 5 %}
-            <p> {{ element.book_text }} </p>
-            {% endif %}
-            {% endfor %}
-        </div>
-    </div>
+    /*프로필사진들*/
+    .profile {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-    <!-- 모달창 -->
-    <form id="frm" class="profile" action="{{ url_for('add_like') }}" method="get">
-        <input type="hidden" id="person_id" name="person_id" value="" />
-        <input type="hidden" id="book_text" name="book_text" value="" />
-        <div id="person1" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('person1')">&times;</span>
-                <div class="modal_box">
-                    <div class="modal_person_L" style="width: 350px; display: flex;">
-                        <div>
-                            <h1 style="font-size: 50px; margin: 5px;">한승주</h1>
-                        </div>
-                        <div>
-                            <p><a class="a-link" href="https://hsjoo126.tistory.com/" target="_blank">https://hsjoo126.tistory.com/<a></p>
-                            <p style="font-size: 18px;"> 어때요, 홈페이지 예쁘죠? </br> 제가 디자인했습니다 ! </p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(1,'한승주')">❤️</span>ESTJ</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(1,'한승주')">❤️</span>장점은 유쾌함</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(1,'한승주')">❤️</span>소통하며 작업하기</p>
-                            <p>공감된다면, 하트를 눌러주세요!</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 30;">방명록</h3>
-                            <div class="guestbook-form">
-                                <div class="input-with-button">
-                                    <input type="text" name="input_text" placeholder="따뜻한 글을 남겨주세요">
-                                    <button type="button" id="submitGuestbook" onclick="fn_add_book(1)">작성</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal_person_R">
-                        <img style="height:420px; width: 200px; margin-left: 30px;"
-                            src="{{ url_for('static', filename='image/team1.jpg') }}" alt="인물1">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="person2" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('person2')">&times;</span>
-                <div class="modal_box">
-                    <div class="modal_person_L" style="width: 350px; display: flex;">
-                        <div>
-                            <h1 style="font-size: 50px; margin: 5px;">김현우</h1>
-                        </div>
-                        <div>
-                            <p><a class="a-link" href="https://www.facebook.com/profile.php?id=100005276611315&locale=ko_KR" target="_blank">https://www.facebook.com/profile.php?id=100005276611315&locale=ko_KR<a></p>
-                            <p style="font-size: 18px;"> 컴퓨터 과학 응용의 첫걸음입니다. <br> 드넓은 사이언스를 향해 ! </p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(2,'김현우')">❤️</span>ENFJ-A</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(2,'김현우')">❤️</span>장점은 신중함</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(2,'김현우')">❤️</span>모든 작업 cost를 0으로, 될 때까지</p>
-                            <p>공감된다면, 하트를 눌러주세요!</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 30;">방명록</h3>
-                            <div class="guestbook-form">
-                                <div class="input-with-button">
-                                    <input type="text" name="input_text" placeholder="따뜻한 글을 남겨주세요">
-                                    <button type="button" id="submitGuestbook" onclick="fn_add_book(2)">작성</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal_person_R">
-                        <img style="height:420px; width: 200px; margin-left: 30px;"
-                            src="{{ url_for('static', filename='image/team3.jpg') }}" alt="인물1">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="person3" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('person2')">&times;</span>
-                <div class="modal_box">
-                    <div class="modal_person_L" style="width: 350px; display: flex;">
-                        <div>
-                            <h1 style="font-size: 50px; margin: 5px;">김용형</h1>
-                        </div>
-                        <div>
-                            <p><a class="a-link" href="https://blog.naver.com/aictby" target="_blank">https://blog.naver.com/aictby<a></p>
-                            <p style="font-size: 18px;">디자인 & CSS 코딩 </p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(3,'김용형')">❤️</span>ENTJ</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(3,'김용형')">❤️</span>문제 해결 노력</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(3,'김용형')">❤️</span>차근차근 찾아가며 될 때까지</p>
-                            <p>공감된다면, 하트를 눌러주세요!</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 30;">방명록</h3>
-                            <div class="guestbook-form">
-                                <div class="input-with-button">
-                                    <input type="text" name="input_text" placeholder="따뜻한 글을 남겨주세요">
-                                    <button type="button" id="submitGuestbook" onclick="fn_add_book(3)">작성</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal_person_R">
-                        <img style="height:420px; width: 200px; margin-left: 30px;"
-                            src="{{ url_for('static', filename='image/team2.jpg') }}" alt="인물1">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="person4" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('person2')">&times;</span>
-                <div class="modal_box">
-                    <div class="modal_person_L" style="width: 350px; display: flex;">
-                        <div>
-                            <h1 style="font-size: 50px; margin: 5px;">장석천</h1>
-                        </div>
-                        <div>
-                            <p><a class="a-link" href="https://jsc94.tistory.com/" target="_blank">https://jsc94.tistory.com/<a></p>
-                            <p style="font-size: 18px;">백엔드</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(4,'장석천')">❤️</span>INFP</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(4,'장석천')">❤️</span>분석 및 응용</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(4,'장석천')">❤️</span>꼼꼼하게 분석하고 파악 후 해결하기</p>
-                            <p>공감된다면, 하트를 눌러주세요!</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 30;">방명록</h3>
-                            <div class="guestbook-form">
-                                <div class="input-with-button">
-                                    <input type="text" name="input_text" placeholder="따뜻한 글을 남겨주세요">
-                                    <button type="button" id="submitGuestbook" onclick="fn_add_book(4)">작성</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal_person_R">
-                        <img style="height:420px; width: 200px; margin-left: 30px;"
-                            src="{{ url_for('static', filename='image/team4.jpeg') }}" alt="인물1">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="person5" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('person2')">&times;</span>
-                <div class="modal_box">
-                    <div class="modal_person_L" style="width: 350px; display: flex;">
-                        <div>
-                            <h1 style="font-size: 50px; margin: 5px;">이정호</h1>
-                        </div>
-                        <div>
-                            <p><a class="a-link" href="https://m0rora.tistory.com" target="_blank">https://m0rora.tistory.com<a></p>
-                            <p style="font-size: 18px;">프론트엔드</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(5,'이정호')">❤️</span>INFJ</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(5,'이정호')">❤️</span>발전하려 노력</p>
-                            <p style="font-size: 20px"><span class="heart-text" onclick="fn_add_like(5,'이정호')">❤️</span>소통,팀워크중시</p>
-                            <p>공감된다면, 하트를 눌러주세요!</p>
-                        </div>
-                        <div>
-                            <h3 style="font-size: 30;">방명록</h3>
-                            <div class="guestbook-form">
-                                <div class="input-with-button">
-                                    <input type="text" name="input_text" placeholder="따뜻한 글을 남겨주세요">
-                                    <button type="button" id="submitGuestbook" onclick="fn_add_book(5)">작성</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal_person_R">
-                        <img style="height:420px; width: 200px; margin-left: 30px;"
-                            src="{{ url_for('static', filename='image/team5.jpg') }}" alt="인물1">
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div>
-    </form>
+    /*슬라이드 이미지*/
+    .carousel-item {
+        width: 100%;
+        height: 600px;
+    }
+
+    .d-block {
+        display: block;
+        width: 100%;
+        height: 600px;
+        object-fit: cover;
+        overflow: hidden;
+    }
+
+    /*댓글창*/
+    input:focus {
+        outline: none;
+        border: none;
+    }
+
+    /*왼쪽 메인화면 프로필*/
+    .left-profile {
+        width: 55px;
+        height: 55px;
+        border-radius: 70%;
+        overflow: hidden;
+    }
+
+    /*왼쪽 메인화면 추가정보프로필*/
+    .left-mini-profile {
+        width: 37px;
+        height: 37px;
+        border-radius: 70%;
+        overflow: hidden;
+    }
+
+    /*상단 스토리 이미지*/
+    .rounded-circle {
+        padding: 2px;
+
+    }
 
 
-    <script>
-        // 모달 열기 함수
-        function showModal(personId) {
-            var modal = document.getElementById(personId);
-            modal.style.display = "block";
+    /*피드 박스*/
+    .feed-box {
+        border: solid 1px #dbdbdb;
+        border-radius: 2px;
+        margin-top: 30px;
+        background-color: white;
+    }
+
+    /*추천회원*/
+    .rec-member {
+        align-items: center;
+        display: flex;
+        margin-top: 2px;
+    }
+
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+
+    @keyframes showText1 {
+        from {
+            transform: translateX(0px);
+            opacity: 0;
         }
 
-        // 모달 닫기 함수
-        function closeModal(personId) {
-            var modal = document.getElementById(personId);
-            modal.style.display = "none";
+        to {
+            transform: translateX(0px);
+            opacity: 1;
+        }
+    }
+
+    @media screen and (max-width: 640px) {
+
+        html {
+            /*background: red;*/
+
         }
 
-        // 모달 외부 클릭 시 닫기 기능
-        window.onclick = function (event) {
-            // 클릭한 요소가 모달이면 닫기
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = "none";
+        .aLayer {
+            /*padding: 1.0em;*/
+            display: none;
+
+        }
+
+    }
+
+    @media screen and (max-width: 1000px) {
+
+        html {
+            /*background: red;*/
+
+        }
+
+        .bLayer {
+            /*padding: 1.0em;*/
+            display: none;
+
+        }
+
+    }
+
+    @media screen and (max-width: 640px) {
+
+        .cLayer {
+            position: relative;
+            width: 90%;
+            height: 60%;
+            overflow: hidden;
+
+
+        }
+
+    }
+
+    /* 벚꽃 */
+    .blossom-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .cherry-blossom-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 700px;
+        /* 이미지의 높이에 따라 조정 */
+        background: url('../static/image/footerBG.png') no-repeat center bottom;
+        background-size: cover;
+        z-index: -1;
+        /* 필요에 따라 조정 */
+    }
+</style>
+
+
+<body style="background-color: #fafafa; width: 95vw;">
+    <!--상단 네비게이션바---------------------------------------------------------------------------------------------------->
+
+    <nav class="navbar navbar-expand-lg navbar-light"
+        style="position: fixed; display: flex; flex-direction: row; width: 100%; border-bottom: solid 1px #dbdbdb; background-color: #ffffff;z-index: 1;">
+        <div class="container-fluid" style="justify-content: space-between; flex-wrap: nowrap; max-width: 940px;">
+            <!--        instagram 이미지-------------------------------------------------------------------------------->
+            <a class="navbar-brand" href="../mainpage/instamain.html"><img style="width: 100px;"
+                    src="https://nbcamp.spartacodingclub.kr/_next/static/media/newLogo.a1d35235.svg">
+            </a>
+            <!--            검색창-------------------------------------------------------------------------------------->
+            <input class="form-control me-2 aLayer" style="max-width: 300px;" type="search" placeholder="검색"
+                aria-label="Search">
+            <div style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
+                <!--            아이콘---------------------------------------------------------------------------------->
+                {% if current_user.is_authenticated %}
+                <a href="/"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
+                <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
+                    data-bs-toggle="modal" data-bs-target="#createPostModal">add_box</span>
+
+
+                <span style="margin: 0 12px 0 12px;" class="material-icons-outlined">favorite_border</span>
+                <a href="/logout"><span style="margin: 6px 12px 0 12px;"
+                        class="material-icons-outlined">logout</span></a>
+                <div class="mini-profile" style="float: right; margin-left: 10px;">
+                    <a href="/profile"><img class="profile" style="margin-bottom: 6px;"
+                            src="https://file2.nocutnews.co.kr/newsroom/image/2021/08/12/202108121210585928_12.jpg"></a>
+                </div>
+                {% else %}
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                    data-target="#loginModal">Login</button>
+                <button type="button" class="btn btn-secondary" data-toggle="modal"
+                    data-target="#registerModal">Register</button>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <!------------------------중앙레이아웃-------------------------------------------------------------------------------->
+    <div style="display: flex; flex-direction: row; position: relative; justify-content: center; top: 85px;">
+        <!----------------왼 쪽메인화면창--------------------------------------------------------------------------------->
+        <div class="cLayer"
+            style="max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: absolute; font-size: 13px; font-weight: bold;">
+            <!-- 포스트 목록 반복 -->
+            {% for post in posts %}
+            <div class="feed-box" id="post_{{ post.id }}">
+                <!-- 포스트 상단 정보 -->
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 2%; margin-left: 1%; margin-bottom: 2%;">
+                    <div style="display: flex; align-items: center">
+                        <div class="box-profile">
+                            <!-- 프로필 이미지 주소가 있다면 아래 img src에 넣어주세요. -->
+                            <!-- <a href="#"><img class="profile" src="{{ post.user.profile_image }}"></a> -->
+                        </div>
+                        <div style="margin-left: 10px">
+                            <!-- 사용자 이름 표시 -->
+                            {{ post.user.username }}
+                        </div>
+                    </div>
+                    <div>
+                        <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
+                            <span class="material-icons-outlined" style="margin-right: 15px;"
+                                data-post-id="{{ post.id }}">edit</span>
+                            <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
+                                data-post-id="{{ post.id }}">delete</span>
+
+                        </button>
+                    </div>
+                </div>
+                <!-- 포스트 내용 -->
+                <div style="margin-left: 10px;">
+                    <div>Likes: {{ post.likes }}</div>
+                    <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+
+        <!-----------(로그인)모달------------------------------------------------------------------------------------------------------>
+        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/login" method="post">
+                            <div class="form-group">
+                                <label for="login-userID">ID</label>
+                                <input type="userID" class="form-control" id="login-userID" name="userID" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password">Password</label>
+                                <input type="password" class="form-control" id="login-password" name="password"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-----------(회원가입)모달------------------------------------------------------------------------------------------------------>
+
+        <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/register" method="post">
+                            <div class="form-group">
+                                <label for="register-username">Nickname</label>
+                                <input type="text" class="form-control" id="register-username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-userID">ID</label>
+                                <input type="userID" class="form-control" id="register-userID" name="userID" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-password">Password</label>
+                                <input type="password" class="form-control" id="register-password" name="password"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
+        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPostModalLabel">Create a Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/posts/create" method="POST">
+                            <div class="mb-3">
+                                <textarea name="content" id="postContent" class="form-control"
+                                    placeholder="What's on your mind?" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Post</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+
+            document.addEventListener('DOMContentLoaded', function () {
+                //삭제
+                const deleteButtons = document.querySelectorAll('.delete-post-btn');
+                deleteButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+                        if (confirm('이 게시물을 삭제하시겠습니까?')) {
+                            deletePost(postId);
+                        }
+                    });
+                });
+
+                //수정
+                document.querySelectorAll('.edit-post-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+                        // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+                        // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+                        // 'Submit' 버튼 클릭 시 editPost 함수 호출
+                        // 
+                    });
+                });
+            });
+
+
+            // 모달 열기
+            const modal = document.getElementById("modal-option");
+            const buttonOpenModal = document.getElementById("open-modal");
+            buttonOpenModal.addEventListener("click", e => {
+                modal.style.top = window.pageYOffset + 'px'; // 모달띄울시, 스크롤이 내려가면 창이 뜨는 위치 수정
+                modal.style.display = "flex";  // 모달 나타나게하기
+                document.body.style.overflowY = "hidden"; // 모달 띄웠을때 스크롤안되게하기
+
+            });
+            // 모달 취소 눌러 닫기
+            const buttonCloseModal = document.getElementById("close-modal");
+            buttonCloseModal.addEventListener("click", e => {
+                modal.style.display = "none";
+                document.body.style.overflowY = "visible";
+            });
+            // 모달 아닌곳 눌러 닫기
+            modal.addEventListener("click", e => {
+                const evTarget = e.target
+                if (evTarget.classList.contains("modal-overlay")) {
+                    modal.style.display = "none";
+                    document.body.style.overflowY = "visible";
+                }
+            });
+
+
+            function deletePost(postId) {
+                console.log(postId)
+                fetch(`/posts/delete/${postId}`, {
+                    method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
+                            document.querySelector(`#post_${postId}`).remove();
+
+                        } else {
+                            alert('게시물을 삭제하지 못했습니다.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
             }
-        }
 
-        /*
-         *  좋아요 이벤트 
-         */
-        function fn_add_like(person_id, name) {
-            alert(name + "님의 좋아요 수가 추가되었습니다.") // 알림창 
-            document.getElementsByName("person_id")[0].value = person_id // 히든 태그에 값을 넣기 ( 백엔드에서 데이터를 받기 위해서! )
-
-            // form 태그 submit 하기
-            frm = document.getElementById("frm")
-            frm.action = "{{ url_for('add_like') }}"
-            frm.submit();
-        }
-
-        /*
-         *  방명록 이벤트
-         */
-        function fn_add_book(person_id) {
-            document.getElementsByName("person_id")[0].value = person_id // 프로필 ID
-
-            index = person_id - 1
-            document.getElementsByName("book_text")[0].value = document.getElementsByName("input_text")[index].value // 방문록 문구
-
-            if (!document.getElementsByName("book_text")[0].value) {
-                alert("문구를 입력해주세요!")
-            } else {
-                alert("글 등록이 완료되었습니다.")
-                // form 태그 submit 하기
-                frm = document.getElementById("frm")
-                frm.action = "{{ url_for('add_book') }}"
-                frm.submit();
+            function editPost(postId, updatedContent) {
+                fetch(`/posts/edit/${postId}`, {
+                    method: 'PATCH',  // PATCH 메소드 사용
+                    headers: {
+                        'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+                    },
+                    body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 성공적으로 수정되었을 때의 처리 로직
+                            alert('Post updated successfully');
+                            // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+                        } else {
+                            // 오류 처리
+                            alert('Failed to update post');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
             }
-        }
-    </script>
+
+        </script>
+
+        <!-- Option 1: Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+        <!-- Option 2: Separate Popper and Bootstrap JS -->
+        <!--
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+-->
+        <canvas id="blossomCanvas"></canvas>
+        <script src="{{ url_for('static', filename='blossom.js') }}"></script>
+
+        <footer class="cherry-blossom-footer">
+            <!-- 푸터 내용, 필요한 경우 -->
+        </footer>
 </body>
 
 </html>
