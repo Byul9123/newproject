@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Design from React Component</title>
+    <style>
+        .top-layout {
+            padding: 20px 40px;
+            background-color: #f0f0f0;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .top-layout .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-layout .container .logo {
+            font-size: 1.2rem;
+            color: #343a40;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .top-layout .container .logo:hover {
+            color: #007bff;
+        }
+
+        a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+
+        .controls-button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .controls-button:hover {
+            background-color: #6c757d;
+        }
+
+
+        .top-layout.light {
+            background-color: #fff;
+            color: black;
+        }
+    </style>
+</head>
+
+<body class="top-layout light">
+    <header>
+        <div class="container">
+            <a href="/" class="logo">HomePage</a>
+            <div class="dropdown-container">
+                <span>Room</span>
+            </div>
+            <div class="controls">
+                <button class="controls-button">Light Mode</button>
+            </div>
+        </div>
+    </header>
+</body>
+
+</html>

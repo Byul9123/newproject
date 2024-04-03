@@ -149,9 +149,8 @@ def create_post():
         flash('포스트 내용을 입력해주세요.')
     return render_template('index.html')
 
+
 # 포스트 조회
-
-
 @app.route('/posts', methods=['GET'])
 def get_posts():
     try:
@@ -179,3 +178,20 @@ def post_delete(post_id):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+# 포스트 수정
+
+@app.route("/posts/edit/<int:post_id>", methods=["PATCH"])
+def edit_post(post_id):
+    data = request.get_json()  # JSON 형식의 요청 본문을 파싱
+    updated_content = data.get('content')
+
+    # 데이터베이스에서 해당 포스트를 찾아서 내용을 업데이트합니다.
+    post = Post.query.get(post_id)
+    if post:
+        post.content = updated_content
+        db.session.commit()
+        return jsonify({"success": "Post updated successfully"}), 200
+    else:
+        return jsonify({"error": "Post not found"}), 404
