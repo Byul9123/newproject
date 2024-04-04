@@ -20,7 +20,12 @@
     <!--    jQuery-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
     <title>팀명없음</title>
 </head>
 <style>
@@ -240,9 +245,13 @@
         max-height: 100%; /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
         height: auto; /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
     }
+
+    .post-container img {
+        max-width: 100%; /* 이미지의 최대 너비를 100%로 설정하여 부모 요소에 맞게 조절 */
+        height: auto; /* 이미지의 높이를 자동으로 조절하여 가로세로 비율을 유지 */
+    }
     
 </style>
-
 
 <body style="background-color: #fafafa; width: 100%;">
     <!--상단 네비게이션바---------------------------------------------------------------------------------------------------->
@@ -310,34 +319,19 @@
                 </div>
                 <!-- 포스트 내용 -->
                 <div style="margin-left: 10px;">
+                    {% if post.image_path %}
+                    <div class="post-container">
+                        <!-- 이미지 경로가 존재하는 경우 이미지 표시 'images/image_path'의 image_path는 텍스트로 인식돼서 작동하지 않음. -->
+                        <a href="/profile"><img class="profile" style="margin-bottom: 6px;"
+                            src="{{ url_for('static', filename = 'uploads/' + post.image_path) }}"></a>                       
+                    </div>
                     <div>Likes: {{ post.likes }}</div>
                     <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
+                    <!-- 이미지가 업로드되었다면 이미지 표시 -->
+                    {% endif %}
                 </div>
-            </div>
             {% endfor %}
-
         </div>
-
-
-        <!--------------------    오른쪽단 피드창-------------------------------------------------------------------------------->
-        <!-- <div class="bLayer"
-            style="max-width: 350px; width: 100%; max-height: 800px; height: 100%; position:sticky; top: 85px; margin-left: 24px;">
-            <div style="margin-top: 8%; margin-left: 1%; margin-bottom: 2%;">
-
-                <form action="/posts/create" method="POST"
-                    style="align-items: center; display: flex; flex-direction: column;">
-                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
-                        Create a Post
-                    </div>
-                    <textarea name="content" id="postContent" placeholder="What's on your mind?"
-                        style="width: 90%; height: 150px; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;"></textarea>
-                    <button type="submit"
-                        style="padding: 10px 20px; font-size: 14px; color: white; background-color: cornflowerblue; border: none; border-radius: 5px; cursor: pointer;">
-                        Submit Post
-                    </button>
-                </form>
-            </div>
-        </div> -->
 
 
         <!-----------(...)모달------------------------------------------------------------------------------------------------------>
@@ -443,9 +437,25 @@
             </div>
         </div>
 
-
         <script>
 
+            // 이미지를 미리보기하는 함수
+            function previewImage() {
+                var imageUpload = document.getElementById('imageUpload');
+                var imagePreview = document.getElementById('imagePreview');
+                if (imageUpload.files.length > 0 && imageUpload.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function() {
+                        imagePreview.src = reader.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(imageUpload.files[0]);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            }
+
+            
             // 모달 열기
             const modal = document.getElementById("modal-option");
             const buttonOpenModal = document.getElementById("open-modal");
@@ -469,24 +479,7 @@
                     document.body.style.overflowY = "visible";
                 }
             });
-
-             // 이미지를 미리보기하기 위해 요소 가져오기
-            var imageUpload = document.getElementById('imageUpload');
-            var imagePreview = document.getElementById('imagePreview');
-
-            // 이미지를 미리보기하는 함수
-            function previewImage() {
-                if (imageUpload.files.length > 0) {
-                    var reader = new FileReader();
-                    reader.onload = function() {
-                        imagePreview.src = reader.result;
-                        imagePreview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(imageUpload.files[0]);
-                } else {
-                    imagePreview.style.display = 'none';
-                }
-            }
+            
         </script>
 
         <!-- Option 1: Bootstrap Bundle with Popper -->

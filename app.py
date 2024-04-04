@@ -17,7 +17,7 @@ login_manager.login_view = 'login'
 # DB 설정
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
-app.config['UPLOAD_FOLDER'] = 'uploads'
+# app.config['UPLOAD_FOLDER'] = 'static'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 db = SQLAlchemy(app)
 
@@ -113,34 +113,41 @@ def home():
         post_content = request.form.get('content')
         image_file = request.files.get('imageUpload')
 
-        # Create a new post object
+        # 새 포스트 생성
         new_post = Post(content=post_content, user=current_user)
 
-        if image_file and allowed_file(image_file.filename):
-            filename = secure_filename(image_file.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            # 이미지 업로드 성공 여부와 상관없이 먼저 포스트를 데이터베이스에 추가
+            db.session.add(new_post)
+            db.session.commit()
+            flash('새 포스트가 성공적으로 생성되었습니다.', 'success')
 
-            try:
+            if image_file and allowed_file(image_file.filename):
+                filename = secure_filename(image_file.filename)
+                image_path = os.path.join(filename)
+
                 image_file.save(image_path)
-                new_post.image_path = image_path  # Set image path after successful save
-                db.session.add(new_post)
+                new_post.image_path = image_path  # 저장 뒤 이미지 세팅
                 db.session.commit()
-                flash('새 포스트가 성공적으로 생성되었습니다.', 'success')
-            except Exception as e:
-                # Log the error for better debugging
-                app.logger.error(f"Error during image upload or database save: {str(e)}")
-                flash('이미지 업로드 또는 데이터베이스 저장 중 오류가 발생했습니다.', 'error')
-        else:
-            flash('올바른 이미지 파일을 업로드해주세요.', 'error')
+            else:
+                flash('올바른 이미지 파일을 업로드해주세요.', 'error')
+        except Exception as e:
+            # 에러로깅
+            app.logger.error(f"Error during database save or image upload: {str(e)}")
+            flash('포스트 생성 중 오류가 발생했습니다.', 'error')
 
         return redirect(url_for('home'))
 
-    # DB User 테이블 데이터 가져오기
-    user_list = User.query.all()
+    else:
+        
+        # GET 요청인 경우 홈 페이지를 렌더링.
+        # DB에서 User 테이블 데이터를 가져옴.
+        user_list = User.query.all()
 
-    # DB Post 데이블 데이터 가져오기
-    post_list = Post.query.all()
-    return render_template('index.html', user=user_list, posts=post_list)
+        # DB Post 데이블 데이터 가져오기
+        post_list = Post.query.all()
+        return render_template('index.html', user=user_list, posts=post_list)
 
 if __name__ == "__main__":
     app.run(debug=True)
+
