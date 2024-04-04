@@ -58,6 +58,18 @@ class Likes(db.Model):
 
 
 # DB 생성
+
+# DB book 테이블 생성
+class Book(db.Model):
+    book_id = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.Integer, nullable=False)
+    book_text = db.Column(db.String(1000), nullable=True)
+    insert_dt = db.Column(db.DateTime, default=datetime.now)
+
+    def __repr__(self):
+        return f'{self.book_id} | {self.userID} | {self.book_text} | {self.insert_dt}'
+
+
 with app.app_context():
     db.create_all()
 
@@ -192,6 +204,23 @@ def post_delete(post_id):
         return jsonify({"success": "Post deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/addBook", methods=['POST'])
+@login_required
+def add_book():
+
+    if request.method == 'POST':
+        # HTML에서 데이터 가져오기
+        userID = request.form.get("userID")
+        book_text = request.form.get("book_text")
+
+        # DB에 해당하는 프로필(userID)에 맞게 방명록 등록
+        book = Book(userID=userID, book_text=book_text)
+        db.session.add(book)
+        db.session.commit()
+
+        return redirect(url_for('home'))
 
 
 # 포스트 수정
