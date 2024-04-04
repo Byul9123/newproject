@@ -329,7 +329,19 @@
                     <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
                 </div> -->
                 </div>
+                <button type="button" onclick=" allbook()">댓글 모아 보기</button>
+                <div class="guestbook-form">
+                    <div class="input-with-button">
+                        <form action="/addBook" method="POST">
+                            <input type="hidden" name="userID" value="{{ current_user.id }}">
+                            <input type="text" name="book_text" placeholder="댓글 작성...">
+                            <button type="button" onclick="submitComment()">게시</button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
+
             {% endfor %}
 
         </div>
@@ -450,6 +462,32 @@
             </div>
         </div>
 
+        <!-- 경고 모달 -->
+        <div id="warningModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>로그인이 필요합니다.</h2>
+                <button onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+
+        <!-- 댓글 모아 보기 모달 -->
+        <div id="allbookModal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">댓글 모아 보기</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Modal body text goes here.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
 
             document.addEventListener('DOMContentLoaded', function () {
@@ -527,6 +565,12 @@
                     document.body.style.overflowY = "visible";
                 }
             });
+            // 방명록 이벤트
+            // function fn_add_book(userID) {
+            //     document.getElementsByName("person_id")[0].value = userID; // 프로필 ID
+            //     var form = document.getElementById("guestbookForm");
+            //     form.submit();
+            // }
 
             // 이미지를 미리보기하기 위해 요소 가져오기
             var imageUpload = document.getElementById('imageUpload');
@@ -592,6 +636,28 @@
             }
 
 
+            // 댓글 게시 함수
+            function submitComment() {
+
+                var userID = "{{ current_user.id }}"; // 현재 사용자의 ID 가져오기
+
+                // 사용자가 로그인되어 있는지 확인
+                if (userID) {
+                    var form = document.getElementById("guestbookForm");
+                    form.submit();
+                } else {
+                    // 로그인 모달 표시
+                    document.getElementById("warningModal").style.display = "block";
+                }
+            }
+            // 모달 닫기 함수
+            function closeModal() {
+                document.getElementById("warningModal").style.display = "none";
+            }
+
+            // function allbook(){
+            //     document.getElementById("allbookModal").style.display = "block";
+            // }
 
 
         </script>
