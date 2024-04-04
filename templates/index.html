@@ -200,11 +200,14 @@
     }
 
     #imagePreview {
-        max-width: 100%; /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
-        max-height: 100%; /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
-        height: auto; /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
+        max-width: 100%;
+        /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
+        max-height: 100%;
+        /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
+        height: auto;
+        /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
     }
-    
+
 
     /* 벚꽃 */
     .blossom-canvas {
@@ -248,12 +251,14 @@
             <div style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
                 <!--            아이콘---------------------------------------------------------------------------------->
                 {% if current_user.is_authenticated %}
-                <a href="/"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
+                <a href="/posts/create"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
                 <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
                     data-bs-toggle="modal" data-bs-target="#createPostModal">add_box</span>
+                <!--좋아요 누른 게시글 확인 아이콘-->
+                <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
+                    data-bs-toggle="modal" data-bs-target="#likedPostsModal">favorite_border</span>
 
 
-                <span style="margin: 0 12px 0 12px;" class="material-icons-outlined">favorite_border</span>
                 <a href="/logout"><span style="margin: 6px 12px 0 12px;"
                         class="material-icons-outlined">logout</span></a>
                 <div class="mini-profile" style="float: right; margin-left: 10px;">
@@ -304,6 +309,25 @@
                 <div style="margin-left: 10px;">
                     <div>Likes: {{ post.likes }}</div>
                     <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
+
+                    <div>
+
+                        {% if post.id in likes %}
+                        <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}">
+                            <span class="material-icons-outlined like-icon" style="color: red;">favorite</span>
+                        </button>
+                        111111111111111111111
+                        {% else %}
+                        <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
+                            <span class="material-icons-outlined like-icon" style="color: black;">favorite_border</span>
+                        </button>
+                        {% endif %}
+
+                        <br>
+                        Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+                    </div>
+                    <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
+                </div> -->
                 </div>
             </div>
             {% endfor %}
@@ -372,7 +396,33 @@
                 </div>
             </div>
         </div>
-
+        <!-----------(좋아요 누른 게시글 확인)모달------------------------------------------------------------------------------------------------------>
+        <!-- 좋아요 누른 게시글 확인 모달 -->
+        <div class="modal fade" id="likedPostsModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="likedPostsModalLabel">Liked Posts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            <!-- 좋아요를 누른 게시글 목록을 여기에 표시 -->
+                            {% for post in posts %}
+                            {% if post.id in likes %}
+                            <li><strong>{{ post.user.username }}</strong>&nbsp;<span style="font-weight: lighter">{{
+                                    post.content }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
         <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
             aria-hidden="true">
@@ -387,11 +437,14 @@
                             <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
                         </div>
                         <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
-                            <input type="file" id="imageUpload" name="imageUpload" accept="image/jpeg,image/gif,image/png" style="display: none;" onchange="previewImage()">
+                            <input type="file" id="imageUpload" name="imageUpload"
+                                accept="image/jpeg,image/gif,image/png" style="display: none;"
+                                onchange="previewImage()">
                             <label for="imageUpload" class="btn btn-primary">Upload Image</label>
-                            <textarea name="content" id="postContent" class="form-control" placeholder="What's on your mind?" rows="3"></textarea>
+                            <textarea name="content" id="postContent" class="form-control"
+                                placeholder="What's on your mind?" rows="3"></textarea>
                             <button type="submit" class="btn btn-primary">Submit Post</button>
-                        </form>                        
+                        </form>
                     </div>
                 </div>
             </div>
@@ -422,15 +475,42 @@
                     });
                 });
             });
+            // 좋아요 버튼 클릭 시
+            document.querySelectorAll('.like-button').forEach(button => {
 
+                button.addEventListener('click', async (e) => {
+                    const postId = e.currentTarget.dataset.postId;
+                    const response = await fetch(`/addLike/${postId}`, { method: 'POST' });
+
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        const likeCountElement = document.getElementById(`like-count-${postId}`);
+                        if (likeCountElement) {
+                            likeCountElement.textContent = responseData.current_likes;
+                        }
+                        const likeIcon = button.querySelector('.like-icon');
+                        if (likeIcon) {
+                            if (button.classList.contains('liked')) {
+                                likeIcon.textContent = 'favorite_border';
+                                likeIcon.style.color = 'black';
+                                button.classList.remove('liked');
+                            } else {
+                                likeIcon.textContent = 'favorite';
+                                likeIcon.style.color = 'red';
+                                button.classList.add('liked');
+                            }
+                        }
+                    }
+                });
+            });
 
             // 모달 열기
             const modal = document.getElementById("modal-option");
             const buttonOpenModal = document.getElementById("open-modal");
             buttonOpenModal.addEventListener("click", e => {
-                modal.style.top = window.pageYOffset + 'px'; // 모달띄울시, 스크롤이 내려가면 창이 뜨는 위치 수정
-                modal.style.display = "flex";  // 모달 나타나게하기
-                document.body.style.overflowY = "hidden"; // 모달 띄웠을때 스크롤안되게하기
+                modal.style.top = window.pageYOffset + 'px';
+                modal.style.display = "flex";
+                document.body.style.overflowY = "hidden";
 
             });
             // 모달 취소 눌러 닫기
@@ -448,7 +528,7 @@
                 }
             });
 
-             // 이미지를 미리보기하기 위해 요소 가져오기
+            // 이미지를 미리보기하기 위해 요소 가져오기
             var imageUpload = document.getElementById('imageUpload');
             var imagePreview = document.getElementById('imagePreview');
 
@@ -456,7 +536,7 @@
             function previewImage() {
                 if (imageUpload.files.length > 0) {
                     var reader = new FileReader();
-                    reader.onload = function() {
+                    reader.onload = function () {
                         imagePreview.src = reader.result;
                         imagePreview.style.display = 'block';
                     };
@@ -511,6 +591,9 @@
                     .catch(error => console.error('Error:', error));
             }
 
+
+
+
         </script>
 
         <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -521,7 +604,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-        
+
 
         <!-- Option 2: Separate Popper and Bootstrap JS -->
         <!--
