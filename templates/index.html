@@ -350,37 +350,49 @@
 
 
                     <div>
-
                         {% if post.id in likes %}
                         <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}">
                             <span class="material-icons-outlined like-icon" style="color: red;">favorite {{ post.likes
                                 }}</span>
                         </button>
-
                         {% else %}
                         <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
                             <span class="material-icons-outlined like-icon" style="color: black;">favorite_border {{
                                 post.likes }}</span>
                         </button>
                         {% endif %}
-
                         <br>
                         Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+                        <br>
+                        {{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}
                     </div>
                     <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
                 </div> -->
                 </div>
-                <button type="button" onclick=" allbook()">댓글 모아 보기</button>
+                <!-- <button type="button" onclick=" allbook()" data-bs-toggle="modal" data-bs-target="#allbooksModal">댓글 모아 보기</button> -->
+                <br>
                 <div class="guestbook-form">
                     <div class="input-with-button">
                         <form action="/addBook" method="POST">
                             <input type="hidden" name="userID" value="{{ current_user.id }}">
+                            <input type="hidden" name="post_id" value="{{ post.id }}">
                             <input type="text" name="book_text" placeholder="댓글 작성...">
-                            <button type="button" onclick="submitComment()">게시</button>
+                            <button type="submit" onclick="submitComment()">게시</button> <!-- button -> submit 수정 -->
                         </form>
                     </div>
                 </div>
-
+                <br>
+                {% for book in books %}
+                {% if post.id == book.post_id %}
+                {% for user1 in user %}
+                {% if user1.id == book.userID %}
+                {{ user1.username }} {{ book.book_text }} <span class="delete-book-btn"
+                    style="font-weight: 300; cursor: pointer;" data-book-id="{{ book.book_id }}">삭제</span>
+                <br>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
             </div>
 
             {% endfor %}
@@ -541,7 +553,7 @@
         </div>
 
         <!-- 댓글 모아 보기 모달 -->
-        <div id="allbookModal" class="modal" tabindex="-1">
+        <!-- <div id="allbookModal" class="modal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -556,9 +568,33 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                //삭제
+                const deleteButtons = document.querySelectorAll('.delete-book-btn');
+                deleteButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        const bookId = this.getAttribute('data-book-id');
+                        if (confirm('이 댓글을 삭제하시겠습니까?')) {
+                            deleteBook(bookId);
+                        }
+                    });
+                });
+
+                //수정
+                // document.querySelectorAll('.edit-post-btn').forEach(button => {
+                //     button.addEventListener('click', function () {
+                //         const postId = this.getAttribute('data-post-id');
+                //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+                //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+                //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
+                //         // 
+                //     });
+                // });
+            });
+
 
             document.addEventListener('DOMContentLoaded', function () {
                 //삭제
@@ -673,6 +709,29 @@
                 } else {
                     imagePreview.style.display = 'none';
                 }
+            }
+
+            function deleteBook(bookId) {
+                console.log(bookId)
+                fetch(`/book/delete/${bookId}`, {
+                    method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
+                            document.querySelector(`#book_${bookId}`).remove();
+
+                        } else {
+                            alert('댓글을 삭제하지 못했습니다.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
             }
 
             function deletePost(postId) {
