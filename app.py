@@ -56,6 +56,16 @@ class Post(db.Model):
     user = db.relationship('User', backref=db.backref('posts', lazy=True))
 
 
+## DB book 테이블 생성
+class Book(db.Model):
+    book_id = db.Column(db.Integer, primary_key=True)
+    userID = db.Column(db.Integer, nullable=False)
+    book_text = db.Column(db.String(1000), nullable=True)
+    insert_dt = db.Column(db.DateTime, default=datetime.now)
+
+    def __repr__(self):
+            return f'{self.book_id} | {self.userID} | {self.book_text} | {self.insert_dt}'
+
 with app.app_context():
     db.create_all()
 
@@ -68,6 +78,7 @@ def home():
 
     # DB Post 데이블 데이터 가져오기
     post_list = Post.query.all()
+
 
     return render_template('index.html', user=user_list, posts=post_list)
 
@@ -122,18 +133,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-# 좋아요 기능 구현
-@app.route("/addLike/<int:post_id>", methods=["POST"])
-def add_like(post_id):
-    post = Post.query.get_or_404(post_id)
-    try:
-        post.likes += 1  # 좋아요 수 증가
-        db.session.commit()
-        return jsonify({"success": "Like added successfully", "current_likes": post.likes})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 # 포스트 생성
 @app.route("/posts/create", methods=['POST'])
 @login_required
@@ -175,6 +174,42 @@ def post_delete(post_id):
         return jsonify({"success": "Post deleted successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route("/addBook", methods=['POST'])
+@login_required
+def add_book():
+    
+    if request.method == 'POST':
+        # HTML에서 데이터 가져오기
+        userID = request.form.get("userID")
+        book_text = request.form.get("book_text")
+        
+        # DB에 해당하는 프로필(userID)에 맞게 방명록 등록
+        book = Book(userID=userID, book_text=book_text)
+        db.session.add(book)
+        db.session.commit()
+        
+        return redirect(url_for('home'))
+        # return render_template('index.html')
+    
+# @app.route("/addBook", methods=['POST'])
+# def add_book():
+#     if request.method == 'POST':
+#         # HTML에서 데이터 가져오기
+#         userID = request.form.get("userID")
+#         book_text = request.form.get("book_text")
+
+#         if current_user.is_authenticated:
+#             # 로그인된 사용자인 경우 방명록 등록
+#             book = Book(userID=userID, book_text=book_text)
+#             db.session.add(book)
+#             db.session.commit()
+#             return redirect(url_for('home'))
+#         else:
+#             # 비로그인 상태인 경우 경고 플래시 메시지를 추가
+#             flash("로그인 후에 댓글을 작성할 수 있습니다.", "warning")
+#             return redirect(url_for('home'))  # 댓글 작성 페이지로 리디렉션
+
 
 
 if __name__ == "__main__":
