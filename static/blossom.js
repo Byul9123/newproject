@@ -1,7 +1,7 @@
 class BlossomItem {
     static defaultOptions = {
         color: '#ffc0cb',
-        radius: [3.0, 5.0],
+        radius: [4.0, 6.0],
         speed: [1, 2],
         wind: [-1.5, 1.5],
         blur: 2
@@ -51,9 +51,9 @@ class BlossomItem {
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById('blossomCanvas');
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = document.body.scrollHeight;
     const blossoms = [];
-    const count = 150;
+    const count = 800;
 
     for (let i = 0; i < count; i++) {
         blossoms.push(new BlossomItem(canvas));

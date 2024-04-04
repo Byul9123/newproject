@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Effect with Clip-path</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz@6..12&family=Raleway:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Nunito Sans", sans-serif;
+        }
+
+        body {
+            background: #fff;
+        }
+
+        main {
+            position: relative;
+            width: calc(min(90rem, 90%));
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            min-height: 100vh;
+            column-gap: 3rem;
+            padding-block: min(20vh, 3rem);
+            justify-content: center;
+        }
+
+        .gallery-slide {
+            width: 18.75rem;
+            height: 35rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            box-shadow: 0.063rem 0.5rem 1.25rem hsl(0deg 0% 0% / 12.16%);
+            border-radius: 0.5rem;
+            margin: 1rem;
+            overflow: hidden;
+        }
+
+        .gallery-slide-img {
+            width: 100%;
+            height: 65%;
+            position: relative;
+            background: url('https://images.unsplash.com/photo-1543335785-8aadf6d8183c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90oy1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1932&q=80') no-repeat center center;
+            background-size: cover;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+
+        .gallery-slide-content {
+            padding: 1.5rem;
+            background-color: #fff;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .gallery-slide-content h2,
+        .gallery-slide-content p {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main>
+        <div class="gallery-slide">
+            <div class="gallery-slide-img"></div>
+            <div class="gallery-slide-content">
+                <h2>Louvre</h2>
+                <p>National art museum in Paris, France. It is located on the Right Bank of the Seine in the city's 1st
+                    arrondissement.</p>
+            </div>
+        </div>
+        <!-- Repeat for other slides as needed -->
+    </main>
+
+</body>
+
+</html>
