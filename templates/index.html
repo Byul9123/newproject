@@ -13,6 +13,9 @@
     <link
         href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz@6..12&family=Raleway:wght@700&display=swap"
+        rel="stylesheet">
+
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet"
@@ -56,6 +59,7 @@
         height: 119px;
         border: solid 1px #dbdbdb;
         display: flex;
+
         border-radius: 2px;
         justify-content: space-around;
         background-color: white;
@@ -142,48 +146,32 @@
         margin-top: 2px;
     }
 
+    /* 폰트 */
     a {
         text-decoration: none;
         color: black;
     }
 
-    .modal-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        z-index: 1;
-        background-color: rgba(0, 0, 0, 0.4);
-        animation: showText1 0.5s;
+
+    .logo {
+        color: #000;
+        font-family: "Raleway", sans-serif;
+        font-weight: 700;
+        font-size: 1.4rem;
+        line-height: 1.4;
+        margin-bottom: 0.425rem;
+        text-transform: capitalize;
+        letter-spacing: 0.02rem;
     }
 
-    .modal_body {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 400px;
-        height: 150px;
-        text-align: center;
-        background-color: rgb(255, 255, 255);
-        border-radius: 10px;
-        box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
-        transform: translateX(-50%) translateY(-50%);
-        font-size: 13px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
-        line-height: 50px;
-    }
-
-    .modal-text {
-        border-bottom: 0;
-        border-left: 0;
-        border-right: 0;
-        border-top: 1px solid #dbdbdb;
-        border-bottom: 1px solid #dbdbdb;
-        background-color: white;
+    p {
+        color: #000;
+        line-height: 1.6;
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     @keyframes showText1 {
@@ -231,6 +219,7 @@
     @media screen and (max-width: 640px) {
 
         .cLayer {
+            position: relative;
             width: 90%;
             height: 60%;
             overflow: hidden;
@@ -241,10 +230,39 @@
     }
 
     #imagePreview {
-        max-width: 100%; /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
-        max-height: 100%; /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
-        height: auto; /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
+        max-width: 100%;
+        /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
+        max-height: 100%;
+        /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
+        height: auto;
+        /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
     }
+
+
+    /* 벚꽃 */
+    .blossom-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .cherry-blossom-footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 700px;
+        /* 이미지의 높이에 따라 조정 */
+        background: url('../static/image/footerBG.png') no-repeat center bottom;
+        background-size: cover;
+        z-index: -1;
+        /* 필요에 따라 조정 */
+    }
+
 
     .post-container img {
         max-width: 100%; /* 이미지의 최대 너비를 100%로 설정하여 부모 요소에 맞게 조절 */
@@ -254,6 +272,7 @@
 </style>
 
 <body style="background-color: #fafafa; width: 100%;">
+
     <!--상단 네비게이션바---------------------------------------------------------------------------------------------------->
 
     <nav class="navbar navbar-expand-lg navbar-light"
@@ -269,12 +288,14 @@
             <div style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
                 <!--            아이콘---------------------------------------------------------------------------------->
                 {% if current_user.is_authenticated %}
-                <a href="/"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
+                <a href="/posts/create"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
                 <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
                     data-bs-toggle="modal" data-bs-target="#createPostModal">add_box</span>
+                <!--좋아요 누른 게시글 확인 아이콘-->
+                <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
+                    data-bs-toggle="modal" data-bs-target="#likedPostsModal">favorite_border</span>
 
 
-                <span style="margin: 0 12px 0 12px;" class="material-icons-outlined">favorite_border</span>
                 <a href="/logout"><span style="margin: 6px 12px 0 12px;"
                         class="material-icons-outlined">logout</span></a>
                 <div class="mini-profile" style="float: right; margin-left: 10px;">
@@ -294,10 +315,10 @@
     <div style="display: flex; flex-direction: row; position: relative; justify-content: center; top: 85px;">
         <!----------------왼 쪽메인화면창--------------------------------------------------------------------------------->
         <div class="cLayer"
-            style="max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: relative; font-size: 13px; font-weight: bold;">
+            style="max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: absolute; font-size: 13px; font-weight: bold;">
             <!-- 포스트 목록 반복 -->
             {% for post in posts %}
-            <div class="feed-box">
+            <div class="feed-box" id="post_{{ post.id }}">
                 <!-- 포스트 상단 정보 -->
                 <div
                     style="display: flex; align-items: center; justify-content: space-between; margin-top: 2%; margin-left: 1%; margin-bottom: 2%;">
@@ -306,50 +327,74 @@
                             <!-- 프로필 이미지 주소가 있다면 아래 img src에 넣어주세요. -->
                             <!-- <a href="#"><img class="profile" src="{{ post.user.profile_image }}"></a> -->
                         </div>
-                        <div style="margin-left: 10px">
-                            <!-- 사용자 이름 표시 -->
-                            {{ post.user.username }}
-                        </div>
                     </div>
                     <div>
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
-                            <span class="material-icons-outlined" style="margin-right: 15px;">more_horiz</span>
+                            <span class="material-icons-outlined edit-post-btn" style="margin-right: 15px;"
+                                data-bs-toggle="modal" data-bs-target="#editPostModal"
+                                data-post-id="{{ post.id }}">edit</span>
+                            <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
+                                data-post-id="{{ post.id }}">delete</span>
+
                         </button>
                     </div>
                 </div>
                 <!-- 포스트 내용 -->
                 <div style="margin-left: 10px;">
+                    <div class="swiper-slide-content">
+                        <h2 class="logo">{{ post.user.username }}</h2>
+                    </div>
+
                     {% if post.image_path %}
                     <div class="post-container">
-                        <!-- 이미지 경로가 존재하는 경우 이미지 표시 'images/image_path'의 image_path는 텍스트로 인식돼서 작동하지 않음. -->
+                        <!-- 이미지 경로가 존재하는 경우 이미지 표시 -->
                         <a href="/profile"><img class="profile" style="margin-bottom: 6px;"
-                            src="{{ url_for('static', filename = 'uploads/' + post.image_path) }}"></a>                       
+                            src="{{ url_for('static', filename = 'uploads/' + post.image_path) }}"></a>  
                     </div>
                     <div>Likes: {{ post.likes }}</div>
                     <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
                     <!-- 이미지가 업로드되었다면 이미지 표시 -->
                     {% endif %}
+
+                    <div>
+                        <p>{{ post.content }}</p>
+                    </div>
+                    <div>
+                        {% if post.id in likes %}
+                        <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}">
+                            <span class="material-icons-outlined like-icon" style="color: red;">favorite {{ post.likes
+                                }}</span>
+                        </button>
+
+                        {% else %}
+                        <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
+                            <span class="material-icons-outlined like-icon" style="color: black;">favorite_border {{
+                                post.likes }}</span>
+                        </button>
+                        {% endif %}
+
+                        <br>
+                        Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+                    </div>
+                    <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
+                </div> -->
                 </div>
-            {% endfor %}
-        </div>
-
-
-        <!-----------(...)모달------------------------------------------------------------------------------------------------------>
-        <div id="modal-option" class="modal-overlay">
-            <div id="modal-script" class="modal_body">
-                <button
-                    style="color:red; font-weight: bold; background-color: white; margin-top: -20px; border: none; border-radius: 10px;">
-                    게시물 삭제
-                </button>
-                <button class="modal-text">
-                    프로필 보기
-                </button>
-                <button id="close-modal" class="close-area"
-                    style="background-color: white; border: none; border-radius: 10px;">
-                    취소
-                </button>
+                <button type="button" onclick=" allbook()">댓글 모아 보기</button>
+                <div class="guestbook-form">
+                    <div class="input-with-button">
+                        <form action="/addBook" method="POST">
+                            <input type="hidden" name="userID" value="{{ current_user.id }}">
+                            <input type="text" name="book_text" placeholder="댓글 작성...">
+                            <button type="button" onclick="submitComment()">게시</button>
+                        </form>
+                    </div>
+                </div>
             </div>
+
+            {% endfor %}
+
         </div>
+
 
         <!-----------(로그인)모달------------------------------------------------------------------------------------------------------>
         <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
@@ -412,7 +457,33 @@
                 </div>
             </div>
         </div>
-
+        <!-----------(좋아요 누른 게시글 확인)모달------------------------------------------------------------------------------------------------------>
+        <!-- 좋아요 누른 게시글 확인 모달 -->
+        <div class="modal fade" id="likedPostsModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="likedPostsModalLabel">Liked Posts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <ul>
+                            <!-- 좋아요를 누른 게시글 목록을 여기에 표시 -->
+                            {% for post in posts %}
+                            {% if post.id in likes %}
+                            <li><strong>{{ post.user.username }}</strong>&nbsp;<span style="font-weight: lighter">{{
+                                    post.content }}</li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
         <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
             aria-hidden="true">
@@ -427,11 +498,69 @@
                             <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
                         </div>
                         <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
-                            <input type="file" id="imageUpload" name="imageUpload" accept="image/jpeg,image/gif,image/png" style="display: none;" onchange="previewImage()">
+                            <input type="file" id="imageUpload" name="imageUpload"
+                                accept="image/jpeg,image/gif,image/png" style="display: none;"
+                                onchange="previewImage()">
                             <label for="imageUpload" class="btn btn-primary">Upload Image</label>
-                            <textarea name="content" id="postContent" class="form-control" placeholder="What's on your mind?" rows="3"></textarea>
+                            <textarea name="content" id="postContent" class="form-control"
+                                placeholder="What's on your mind?" rows="3"></textarea>
                             <button type="submit" class="btn btn-primary">Submit Post</button>
-                        </form>                        
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-----------포스트 수정 모달 ----------------------------------------------------------------------------------------------------->
+        <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="imagePreviewContainer">
+                            <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                        </div>
+                        <form id="editPostForm" action="/posts/create" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageUpload" name="imageUpload"
+                                accept="image/jpeg,image/gif,image/png" style="display: none;"
+                                onchange="previewImage()">
+                            <label for="imageUpload" class="btn btn-primary">Upload Image</label>
+                            <div class="mb-3">
+                                <label for="editPostContent" class="form-label">Content</label>
+                                <textarea class="form-control" id="editPostContent" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 경고 모달 -->
+        <div id="warningModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>로그인이 필요합니다.</h2>
+                <button onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+
+        <!-- 댓글 모아 보기 모달 -->
+        <div id="allbookModal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">댓글 모아 보기</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Modal body text goes here.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -439,30 +568,81 @@
 
         <script>
 
-            // 이미지를 미리보기하는 함수
-            function previewImage() {
-                var imageUpload = document.getElementById('imageUpload');
-                var imagePreview = document.getElementById('imagePreview');
-                if (imageUpload.files.length > 0 && imageUpload.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function() {
-                        imagePreview.src = reader.result;
-                        imagePreview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(imageUpload.files[0]);
-                } else {
-                    imagePreview.style.display = 'none';
-                }
-            }
+            document.addEventListener('DOMContentLoaded', function () {
+                //삭제
+                const deleteButtons = document.querySelectorAll('.delete-post-btn');
+                deleteButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+                        if (confirm('이 게시물을 삭제하시겠습니까?')) {
+                            deletePost(postId);
+                        }
+                    });
+                });
 
-            
+                //수정
+                document.querySelectorAll('.edit-post-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const postId = this.getAttribute('data-post-id');
+                        console.log("111111111수정")
+                        // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+                        // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+                        // 'Submit' 버튼 클릭 시 editPost 함수 호출
+
+                        fetch(`/posts/${postId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // 현재 포스트 내용을 수정 폼에 채우기
+                                document.getElementById('editPostContent').value = data.content;
+                                const editModal = new bootstrap.Modal(document.getElementById('createPostModal'));
+                                editModal.show();
+
+                                // 폼 제출 이벤트 리스너
+                                document.getElementById('editPostForm').onsubmit = function (e) {
+                                    e.preventDefault(); // 폼 기본 제출 방지
+                                    editPost(postId); // 수정 내용 제출 함수 호출
+                                    console.log("111111111완료")
+                                };
+                            });
+                    });
+                });
+            });
+            // 좋아요 버튼 클릭 시
+            document.querySelectorAll('.like-button').forEach(button => {
+
+                button.addEventListener('click', async (e) => {
+                    const postId = e.currentTarget.dataset.postId;
+                    const response = await fetch(`/addLike/${postId}`, { method: 'POST' });
+
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        const likeCountElement = document.getElementById(`like-count-${postId}`);
+                        if (likeCountElement) {
+                            likeCountElement.textContent = responseData.current_likes;
+                        }
+                        const likeIcon = button.querySelector('.like-icon');
+                        if (likeIcon) {
+                            if (button.classList.contains('liked')) {
+                                likeIcon.textContent = 'favorite_border';
+                                likeIcon.style.color = 'black';
+                                button.classList.remove('liked');
+                            } else {
+                                likeIcon.textContent = 'favorite';
+                                likeIcon.style.color = 'red';
+                                button.classList.add('liked');
+                            }
+                        }
+                    }
+                });
+            });
+
             // 모달 열기
             const modal = document.getElementById("modal-option");
             const buttonOpenModal = document.getElementById("open-modal");
             buttonOpenModal.addEventListener("click", e => {
-                modal.style.top = window.pageYOffset + 'px'; // 모달띄울시, 스크롤이 내려가면 창이 뜨는 위치 수정
-                modal.style.display = "flex";  // 모달 나타나게하기
-                document.body.style.overflowY = "hidden"; // 모달 띄웠을때 스크롤안되게하기
+                modal.style.top = window.pageYOffset + 'px';
+                modal.style.display = "flex";
+                document.body.style.overflowY = "hidden";
 
             });
             // 모달 취소 눌러 닫기
@@ -479,7 +659,98 @@
                     document.body.style.overflowY = "visible";
                 }
             });
-            
+
+            // 방명록 이벤트
+            // function fn_add_book(userID) {
+            //     document.getElementsByName("person_id")[0].value = userID; // 프로필 ID
+            //     var form = document.getElementById("guestbookForm");
+            //     form.submit();
+            // }
+
+
+            // 이미지를 미리보기하는 함수
+            function previewImage() {
+                var imageUpload = document.getElementById('imageUpload');
+                var imagePreview = document.getElementById('imagePreview');
+                if (imageUpload.files.length > 0 && imageUpload.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        imagePreview.src = reader.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(imageUpload.files[0]);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            }
+
+            function deletePost(postId) {
+                console.log(postId)
+                fetch(`/posts/delete/${postId}`, {
+                    method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
+                            document.querySelector(`#post_${postId}`).remove();
+
+                        } else {
+                            alert('게시물을 삭제하지 못했습니다.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function editPost(postId) {
+                const updatedContent = document.getElementById('editPostContent').value;
+                // 수정 내용을 서버에 전송
+                fetch(`/posts/edit/${postId}`, {
+                    method: 'POST', // POST 또는 PATCH 메소드 사용
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content: updatedContent }),
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Post updated successfully');
+                            location.reload(); // 페이지 새로고침 또는 다른 방법으로 UI 업데이트
+                        } else {
+                            alert('Failed to update post');
+                        }
+                    });
+            }
+
+
+            // 댓글 게시 함수
+            function submitComment() {
+
+                var userID = "{{ current_user.id }}"; // 현재 사용자의 ID 가져오기
+
+                // 사용자가 로그인되어 있는지 확인
+                if (userID) {
+                    var form = document.getElementById("guestbookForm");
+                    form.submit();
+                } else {
+                    // 로그인 모달 표시
+                    document.getElementById("warningModal").style.display = "block";
+                }
+            }
+            // 모달 닫기 함수
+            function closeModal() {
+                document.getElementById("warningModal").style.display = "none";
+            }
+
+            // function allbook(){
+            //     document.getElementById("allbookModal").style.display = "block";
+            // }
+
         </script>
 
         <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -490,13 +761,19 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-        
+
 
         <!-- Option 2: Separate Popper and Bootstrap JS -->
         <!--
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 -->
+        <canvas id="blossomCanvas"></canvas>
+        <script src="{{ url_for('static', filename='blossom.js') }}"></script>
+
+        <footer class="cherry-blossom-footer">
+            <!-- 푸터 내용, 필요한 경우 -->
+        </footer>
 </body>
 
 </html>
