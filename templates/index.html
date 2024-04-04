@@ -297,7 +297,8 @@
                     </div>
                     <div>
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
-                            <span class="material-icons-outlined" style="margin-right: 15px;"
+                            <span class="material-icons-outlined edit-post-btn" style="margin-right: 15px;"
+                                data-bs-toggle="modal" data-bs-target="#createPostModal"
                                 data-post-id="{{ post.id }}">edit</span>
                             <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
                                 data-post-id="{{ post.id }}">delete</span>
@@ -307,19 +308,20 @@
                 </div>
                 <!-- 포스트 내용 -->
                 <div style="margin-left: 10px;">
-                    <div>Likes: {{ post.likes }}</div>
-                    <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
-
+                    <div><span style="font-weight: lighter">{{ post.content }}</span></div>
+                    {{post.image_path}}
                     <div>
 
                         {% if post.id in likes %}
                         <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}">
-                            <span class="material-icons-outlined like-icon" style="color: red;">favorite</span>
+                            <span class="material-icons-outlined like-icon" style="color: red;">favorite {{ post.likes
+                                }}</span>
                         </button>
-                        111111111111111111111
+
                         {% else %}
                         <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
-                            <span class="material-icons-outlined like-icon" style="color: black;">favorite_border</span>
+                            <span class="material-icons-outlined like-icon" style="color: black;">favorite_border {{
+                                post.likes }}</span>
                         </button>
                         {% endif %}
 
@@ -462,6 +464,27 @@
             </div>
         </div>
 
+        <!-----------포스트 수정 모달 ----------------------------------------------------------------------------------------------------->
+        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPostModalLabel">Edit Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editPostForm">
+                            <div class="mb-3">
+                                <label for="editPostContent" class="form-label">Content</label>
+                                <textarea class="form-control" id="editPostContent" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- 경고 모달 -->
         <div id="warningModal" class="modal" style="display: none;">
             <div class="modal-content">
@@ -506,10 +529,26 @@
                 document.querySelectorAll('.edit-post-btn').forEach(button => {
                     button.addEventListener('click', function () {
                         const postId = this.getAttribute('data-post-id');
+                        console.log("111111111수정")
                         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
                         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
                         // 'Submit' 버튼 클릭 시 editPost 함수 호출
-                        // 
+
+                        fetch(`/posts/${postId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // 현재 포스트 내용을 수정 폼에 채우기
+                                document.getElementById('editPostContent').value = data.content;
+                                const editModal = new bootstrap.Modal(document.getElementById('createPostModal'));
+                                editModal.show();
+
+                                // 폼 제출 이벤트 리스너
+                                document.getElementById('editPostForm').onsubmit = function (e) {
+                                    e.preventDefault(); // 폼 기본 제출 방지
+                                    editPost(postId); // 수정 내용 제출 함수 호출
+                                    console.log("111111111완료")
+                                };
+                            });
                     });
                 });
             });
@@ -572,13 +611,12 @@
             //     form.submit();
             // }
 
-            // 이미지를 미리보기하기 위해 요소 가져오기
-            var imageUpload = document.getElementById('imageUpload');
-            var imagePreview = document.getElementById('imagePreview');
 
             // 이미지를 미리보기하는 함수
             function previewImage() {
-                if (imageUpload.files.length > 0) {
+                var imageUpload = document.getElementById('imageUpload');
+                var imagePreview = document.getElementById('imagePreview');
+                if (imageUpload.files.length > 0 && imageUpload.files[0]) {
                     var reader = new FileReader();
                     reader.onload = function () {
                         imagePreview.src = reader.result;
@@ -613,26 +651,24 @@
                     .catch(error => console.error('Error:', error));
             }
 
-            function editPost(postId, updatedContent) {
+            function editPost(postId) {
+                const updatedContent = document.getElementById('editPostContent').value;
+                // 수정 내용을 서버에 전송
                 fetch(`/posts/edit/${postId}`, {
-                    method: 'PATCH',  // PATCH 메소드 사용
+                    method: 'POST', // POST 또는 PATCH 메소드 사용
                     headers: {
-                        'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
+                    body: JSON.stringify({ content: updatedContent }),
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // 성공적으로 수정되었을 때의 처리 로직
+                    .then(response => {
+                        if (response.ok) {
                             alert('Post updated successfully');
-                            // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+                            location.reload(); // 페이지 새로고침 또는 다른 방법으로 UI 업데이트
                         } else {
-                            // 오류 처리
                             alert('Failed to update post');
                         }
-                    })
-                    .catch(error => console.error('Error:', error));
+                    });
             }
 
 

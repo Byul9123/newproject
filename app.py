@@ -114,10 +114,7 @@ def home():
     if current_user.is_active:
         like_list = Likes.query.filter_by(
             user_id=current_user.id, liked=1).all()
-    # likes_list = Likes.query.all() #일단 비어있고, 로그인 시에만
-    print(like_list)
     likes_list = [like.post_id for like in like_list]
-    print(likes_list)
     return render_template('index.html', user=user_list, posts=post_list, likes=likes_list)
 
 
@@ -156,51 +153,53 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
-@app.route("/posts/create", methods=['GET', 'POST'])
 # 포스트 생성
-@app.route("/posts/create", methods=['POST'])
+@app.route("/posts/create", methods=['GET', 'POST'])
 @login_required
 def home1():
     if request.method == 'POST':
         post_content = request.form.get('content')
         image_file = request.files.get('imageUpload')
-
-        # Create a new post object
+        # 새 포스트 생성
         new_post = Post(content=post_content, user=current_user)
-
-        if image_file and allowed_file(image_file.filename):
-            filename = secure_filename(image_file.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            try:
+        try:
+            # 이미지 업로드 성공 여부와 상관없이 먼저 포스트를 데이터베이스에 추가
+            db.session.add(new_post)
+            db.session.commit()
+            flash('새 포스트가 성공적으로 생성되었습니다.', 'success')
+            if image_file and allowed_file(image_file.filename):
+                filename = secure_filename(image_file.filename)
+                image_path = os.path.join(
+                    app.config['UPLOAD_FOLDER'], filename)
                 image_file.save(image_path)
-                new_post.image_path = image_path  # Set image path after successful save
-                db.session.add(new_post)
+                new_post.image_path = image_path  # 저장 뒤 이미지 세팅
                 db.session.commit()
-                flash('새 포스트가 성공적으로 생성되었습니다.', 'success')
-            except Exception as e:
-                app.logger.error(
-                    f"Error during image upload or database save: {str(e)}")
-                flash('이미지 업로드 또는 데이터베이스 저장 중 오류가 발생했습니다.', 'error')
-        else:
-            flash('올바른 이미지 파일을 업로드해주세요.', 'error')
-
+            else:
+                flash('올바른 이미지 파일을 업로드해주세요.', 'error')
+        except Exception as e:
+            # 에러로깅
+            app.logger.error(
+                f"Error during database save or image upload: {str(e)}")
+            flash('포스트 생성 중 오류가 발생했습니다.', 'error')
         return redirect(url_for('home'))
-
-    # DB User 테이블 데이터 가져오기
-    user_list = User.query.all()
-
-    # DB Post 데이블 데이터 가져오기
-    post_list = Post.query.all()
-    return render_template('index.html', user=user_list, posts=post_list)
-
+    else:
+        # GET 요청인 경우 홈 페이지를 렌더링.
+        # DB에서 User 테이블 데이터를 가져옴.
+        user_list = User.query.all()
+        # DB Post 데이블 데이터 가져오기
+        post_list = Post.query.all()
+        return render_template('index.html', user=user_list, posts=post_list)
 
 # 포스트 삭제
+
+
 @app.route("/posts/delete/<int:post_id>", methods=["DELETE"])
 def post_delete(post_id):
     post = Post.query.get_or_404(post_id)
     try:
         print("post_id:", post_id)
+        Likes.query.filter_by(post_id=post_id).delete()
+
         db.session.delete(post)
         db.session.commit()
         return jsonify({"success": "Post deleted successfully"}), 200
@@ -226,18 +225,20 @@ def add_book():
 
 
 # 포스트 수정
-@app.route("/posts/edit/<int:post_id>", methods=["PATCH"])
-def edit_post(post_id):
-    data = request.get_json()
-    updated_content = data.get('content')
-    print("edit NOW", post_id)
-    post = Post.query.get(post_id)
-    if post:
-        post.content = updated_content
-        db.session.commit()
-        return jsonify({"success": "Post updated successfully"}), 200
-    else:
-        return jsonify({"error": "Post not found"}), 404
+@app.route("/posts/edit/<int:post_id>", methods=["POST"])
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if 'imageUpload' in request.files:
+        file = request.files['imageUpload']
+        if file.filename != '':
+            filename = secure_filename(file.filename)
+            filepath = os.path.join('uploads', filename)
+            file.save(filepath)
+            post.image_url = filepath  # 이미지 URL을 포스트 모델에 저장
+    post.content = request.form['content']
+    db.session.commit()
+    flash('Post updated successfully!', 'success')
+    return redirect(url_for('home'))
 
 
 # 좋아요 기능 구현
