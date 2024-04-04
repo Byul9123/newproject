@@ -13,6 +13,9 @@
     <link
         href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz@6..12&family=Raleway:wght@700&display=swap"
+        rel="stylesheet">
+
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet"
@@ -138,11 +141,33 @@
         margin-top: 2px;
     }
 
+    /* 폰트 */
     a {
         text-decoration: none;
         color: black;
     }
 
+
+    .logo {
+        color: #000;
+        font-family: "Raleway", sans-serif;
+        font-weight: 700;
+        font-size: 1.4rem;
+        line-height: 1.4;
+        margin-bottom: 0.425rem;
+        text-transform: capitalize;
+        letter-spacing: 0.02rem;
+    }
+
+    p {
+        color: #000;
+        line-height: 1.6;
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
 
     @keyframes showText1 {
         from {
@@ -290,15 +315,11 @@
                             <!-- 프로필 이미지 주소가 있다면 아래 img src에 넣어주세요. -->
                             <!-- <a href="#"><img class="profile" src="{{ post.user.profile_image }}"></a> -->
                         </div>
-                        <div style="margin-left: 10px">
-                            <!-- 사용자 이름 표시 -->
-                            {{ post.user.username }}
-                        </div>
                     </div>
                     <div>
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
                             <span class="material-icons-outlined edit-post-btn" style="margin-right: 15px;"
-                                data-bs-toggle="modal" data-bs-target="#createPostModal"
+                                data-bs-toggle="modal" data-bs-target="#editPostModal"
                                 data-post-id="{{ post.id }}">edit</span>
                             <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
                                 data-post-id="{{ post.id }}">delete</span>
@@ -308,8 +329,26 @@
                 </div>
                 <!-- 포스트 내용 -->
                 <div style="margin-left: 10px;">
-                    <div><span style="font-weight: lighter">{{ post.content }}</span></div>
-                    {{post.image_path}}
+
+                    <div class="swiper-slide-content">
+                        <h2 class="logo">{{ post.user.username }}</h2>
+                    </div>
+
+                    {% if post.image_path %}
+                    <div class="post-container">
+                        <!-- 이미지 경로가 존재하는 경우 이미지 표시 -->
+                        <img src="{{ url_for('static', filename=post.image_path) }}" alt="Post Image">
+                    </div>
+                    <div>Likes: {{ post.likes }}</div>
+                    <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
+                    <!-- 이미지가 업로드되었다면 이미지 표시 -->
+                    {% endif %}
+
+                    <div>
+                        <p>{{ post.content }}</p>
+                    </div>
+
+
                     <div>
 
                         {% if post.id in likes %}
@@ -465,16 +504,23 @@
         </div>
 
         <!-----------포스트 수정 모달 ----------------------------------------------------------------------------------------------------->
-        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+        <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="createPostModalLabel">Edit Post</h5>
+                        <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="editPostForm">
+                        <div id="imagePreviewContainer">
+                            <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                        </div>
+                        <form id="editPostForm" action="/posts/create" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageUpload" name="imageUpload"
+                                accept="image/jpeg,image/gif,image/png" style="display: none;"
+                                onchange="previewImage()">
+                            <label for="imageUpload" class="btn btn-primary">Upload Image</label>
                             <div class="mb-3">
                                 <label for="editPostContent" class="form-label">Content</label>
                                 <textarea class="form-control" id="editPostContent" rows="3"></textarea>
@@ -485,6 +531,7 @@
                 </div>
             </div>
         </div>
+
         <!-- 경고 모달 -->
         <div id="warningModal" class="modal" style="display: none;">
             <div class="modal-content">
