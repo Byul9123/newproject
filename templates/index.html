@@ -339,8 +339,6 @@
                         <!-- 이미지 경로가 존재하는 경우 이미지 표시 -->
                         <img src="{{ url_for('static', filename=post.image_path) }}" alt="Post Image">
                     </div>
-                    <div>Likes: {{ post.likes }}</div>
-                    <div>{{ post.user.username }}<span style="font-weight: lighter">{{ post.content }}</span></div>
                     <!-- 이미지가 업로드되었다면 이미지 표시 -->
                     {% endif %}
 
@@ -361,15 +359,9 @@
                                 post.likes }}</span>
                         </button>
                         {% endif %}
-                        <br>
-                        Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
-                        <br>
-                        {{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}
+                        <span id="like-count-{{ post.id }}">{{ post.likes }}</span>
                     </div>
-                    <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
-                </div> -->
                 </div>
-                <!-- <button type="button" onclick=" allbook()" data-bs-toggle="modal" data-bs-target="#allbooksModal">댓글 모아 보기</button> -->
                 <br>
                 <div class="guestbook-form">
                     <div class="input-with-button">
