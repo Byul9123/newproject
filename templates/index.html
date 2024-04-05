@@ -120,7 +120,10 @@
     .feed-box {
         background-color: #FFFFFF;
         width: 25rem;
-        height: 35rem;
+        min-height: 20rem;
+        /* 최소 높이 설정 */
+        max-height: 45rem;
+        /* 최대 높이 설정 */
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
@@ -129,6 +132,7 @@
         margin: 1rem;
         overflow: hidden;
     }
+
     .post-container {
         width: 100%;
         height: auto;
@@ -136,6 +140,7 @@
         clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
         object-fit: cover;
     }
+
     .post-container img {
         margin-top: -5%;
         width: 100%;
@@ -166,6 +171,7 @@
         text-transform: capitalize;
         letter-spacing: 0.02rem;
     }
+
     p {
         color: #000;
         line-height: 1.6;
@@ -248,9 +254,11 @@
         height: 5rem;
         transform: rotateY(180deg);
     }
+
     .shape-fill {
         fill: #FFFFFF;
     }
+
     #imagePreview {
         max-width: 100%;
         /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
@@ -259,6 +267,7 @@
         height: auto;
         /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
     }
+
     /* 벚꽃 */
     .blossom-canvas {
         position: fixed;
@@ -269,6 +278,7 @@
         z-index: -1;
         pointer-events: none;
     }
+
     .cherry-blossom-footer {
         position: fixed;
         left: 0;
@@ -280,6 +290,24 @@
         background-size: cover;
         z-index: -1;
     }
+
+    .comment-container {
+        display: flex;
+        align-items: center;
+        /* 댓글과 수정/삭제 링크를 수직 중앙 정렬합니다. */
+    }
+
+    .comment-container span {
+        margin-right: 5px;
+        /* 수정과 삭제 링크 사이의 간격을 조정합니다. */
+    }
+
+    .like-button {
+        padding: 0;
+        /* 패딩 제거 */
+        width: auto;
+        /* 너비를 내용에 맞게 자동으로 조절 */
+    }
 </style>
 
 
@@ -287,7 +315,7 @@
     <!--상단 네비게이션바---------------------------------------------------------------------------------------------------->
 
     <nav class="navbar navbar-expand-lg navbar-light"
-        style="position: fixed; display: flex; flex-direction: row; width: 100%; border-bottom: solid 1px #dbdbdb; background-color: #ffffff;z-index: 1;">
+        style="position: fixed; display: flex; flex-direction: row; width: 100%; border-bottom: solid 1px #dbdbdb; background-color: #ffffff;z-index: 20;">
         <div class="container-fluid" style="justify-content: space-between; flex-wrap: nowrap; max-width: 940px;">
             <!--        instagram 이미지-------------------------------------------------------------------------------->
             <!-- 수정 필요: 홈버튼 -->
@@ -311,10 +339,11 @@
 
                 <a href="/logout"><span style="margin: 6px 12px 0 12px;"
                         class="material-icons-outlined">logout</span></a>
-                <div class="mini-profile" style="float: right; margin-left: 10px;">
-                    <a href="/profile"><img class="profile" style="margin-bottom: 6px;"
+                <!-- <div class="mini-profile" style="float: right; margin-left: 10px;">
+                    <a href="/"><img class="profile" style="margin-bottom: 6px;"
                             src="https://file2.nocutnews.co.kr/newsroom/image/2021/08/12/202108121210585928_12.jpg"></a>
-                </div>
+                </div> -->
+                <span style="font-weight: bold;">{{ current_user.username }}님, 안녕하세요!</span>
                 {% else %}
                 <button type="button" class="btn btn-primary" data-toggle="modal"
                     data-target="#loginModal">Login</button>
@@ -341,9 +370,8 @@
                     </div>
                     <div style="float: right;">
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
-                            <span class="material-icons-outlined edit-post-btn" style="margin-right: 15px;"
-                                data-bs-toggle="modal" data-bs-target="#editPostModal"
-                                data-post-id="{{ post.id }}">edit</span>
+                            <span class="material-icons-outlined" style="margin-right: 15px;"
+                                data-post-id="{{ post.id }}" onclick="toggleEditPostForm('{{ post.id }}')">edit</span>
                             <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
                                 data-post-id="{{ post.id }}">delete</span>
                         </button>
@@ -356,19 +384,19 @@
                     <img src="{{ url_for('static', filename='uploads/' + post.image_path) }}" alt="Post Image">
                 </div>
                 {% endif %}
-                <div style="font-size: 10px;">
+                <div style="font-size: 15px;">
                     {% if post.id in likes %}
                     <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}" style="width: 20px;">
                         <span class="material-icons-outlined like-icon" style="color: red;">favorite {{ post.likes
                             }}</span>
                     </button>
-                    <span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+                    <span id="like-count-{{ post.id }}">Likes: {{ post.likes }}</span>
                     {% else %}
                     <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
                         <span class="material-icons-outlined like-icon" style="color: black;">favorite_border {{
                             post.likes }}</span>
                     </button>
-                    <span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+                    <span id="like-count-{{ post.id }}">Likes: {{ post.likes }}</span>
                     {% endif %}
                     <br>
                 </div>
@@ -376,6 +404,11 @@
                 <div style="margin-left: 10px;">
                     <div>
                         <p>{{ post.content }}</p>
+                        <form class="edit-form" id="edit-form-post-{{ post.id }}"
+                            onsubmit="editPost(event, '{{ post.id }}')" style="display: none;">
+                            <input type="text" name="content" placeholder="게시글 수정 내용">
+                            <input type="submit" value="저장">
+                        </form>
                     </div>
                     <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
                 </div> -->
@@ -397,8 +430,19 @@
                 {% if post.id == book.post_id %}
                 {% for user1 in user %}
                 {% if user1.id == book.userID %}
-                {{ user1.username }} {{ book.book_text }} <span class="delete-book-btn"
-                    style="font-weight: 300; cursor: pointer;" data-book-id="{{ book.book_id }}">삭제</span>
+                <div class="comment-container">
+                    {{ user1.username }} {{ book.book_text }}&nbsp;
+                    <span class="edit-book-btn" style="font-weight: 300; cursor: pointer;"
+                        data-bookid="{{ book.book_id }}" onclick="toggleEditBookForm('{{ book.book_id }}')">수정</span>
+                    |&nbsp;
+                    <span class="delete-book-btn" style="font-weight: 300; cursor: pointer;"
+                        data-book-id="{{ book.book_id }}">삭제</span>
+                    <form class="edit-form" id="edit-form-book-{{ book.book_id }}"
+                        onsubmit="editBook(event, '{{ book.book_id }}')" style="display: none;">
+                        <input type="text" name="book_text" placeholder="댓글 수정 내용">
+                        <input type="submit" value="저장">
+                    </form>
+                </div>
                 <br>
                 {% endif %}
                 {% endfor %}
@@ -408,126 +452,123 @@
             {% endfor %}
         </div>
 
-        </div>
+    </div>
 
 
-        <!-----------(로그인)모달------------------------------------------------------------------------------------------------------>
-        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="loginModalLabel">Login</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="/login" method="post">
-                            <div class="form-group">
-                                <label for="login-userID">ID</label>
-                                <input type="userID" class="form-control" id="login-userID" name="userID" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="login-password">Password</label>
-                                <input type="password" class="form-control" id="login-password" name="password"
-                                    required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </form>
-                    </div>
+    <!-----------(로그인)모달------------------------------------------------------------------------------------------------------>
+    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            </div>
-        </div>
-        <!-----------(회원가입)모달------------------------------------------------------------------------------------------------------>
-
-        <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="registerModalLabel">Register</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="/register" method="post">
-                            <div class="form-group">
-                                <label for="register-username">Nickname</label>
-                                <input type="text" class="form-control" id="register-username" name="username" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="register-userID">ID</label>
-                                <input type="userID" class="form-control" id="register-userID" name="userID" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="register-password">Password</label>
-                                <input type="password" class="form-control" id="register-password" name="password"
-                                    required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Register</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-----------(좋아요 누른 게시글 확인)모달------------------------------------------------------------------------------------------------------>
-        <!-- 좋아요 누른 게시글 확인 모달 -->
-        <div class="modal fade" id="likedPostsModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="likedPostsModalLabel">Liked Posts</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <ul>
-                            <!-- 좋아요를 누른 게시글 목록을 여기에 표시 -->
-                            {% for post in posts %}
-                            {% if post.id in likes %}
-                            <li><strong>{{ post.user.username }}</strong>&nbsp;<span style="font-weight: lighter">{{
-                                    post.content }}</li>
-                            {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
-        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createPostModalLabel">Create a Post</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="imagePreviewContainer">
-                            <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                <div class="modal-body">
+                    <form action="/login" method="post">
+                        <div class="form-group">
+                            <label for="login-userID">ID</label>
+                            <input type="userID" class="form-control" id="login-userID" name="userID" required>
                         </div>
-                        <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
-                            <input type="file" id="imageUpload" name="imageUpload"
-                                accept="image/jpeg,image/gif,image/png" style="display: none;"
-                                onchange="previewImage()">
-                            <label for="imageUpload" class="btn btn-primary">Upload Image</label>
-                            <textarea name="content" id="postContent" class="form-control"
-                                placeholder="What's on your mind?" rows="3"></textarea>
-                            <button type="submit" class="btn btn-primary">Submit Post</button>
-                        </form>
-                    </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" class="form-control" id="login-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
+    <!-----------(회원가입)모달------------------------------------------------------------------------------------------------------>
 
-        <!-- 댓글 수정 모달 -->
-        <!-- <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/register" method="post">
+                        <div class="form-group">
+                            <label for="register-username">Nickname</label>
+                            <input type="text" class="form-control" id="register-username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-userID">ID</label>
+                            <input type="userID" class="form-control" id="register-userID" name="userID" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" class="form-control" id="register-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-----------(좋아요 누른 게시글 확인)모달------------------------------------------------------------------------------------------------------>
+    <!-- 좋아요 누른 게시글 확인 모달 -->
+    <div class="modal fade" id="likedPostsModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="likedPostsModalLabel">Liked Posts</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <!-- 좋아요를 누른 게시글 목록을 여기에 표시 -->
+                        {% for post in posts %}
+                        {% if post.id in likes %}
+                        <li><strong>{{ post.user.username }}</strong>&nbsp;<span style="font-weight: lighter">{{
+                                post.content }}</li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-----------(포스트 생성)모달------------------------------------------------------------------------------------------------------>
+    <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createPostModalLabel">Create a Post</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="imagePreviewContainer">
+                        <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                    </div>
+                    <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
+                        <input type="file" id="imageUpload" name="imageUpload" accept="image/jpeg,image/gif,image/png"
+                            style="display: none;" onchange="previewImage()">
+                        <label for="imageUpload" class="btn btn-primary">Upload Image</label>
+                        <textarea name="content" id="postContent" class="form-control"
+                            placeholder="What's on your mind?" rows="3"></textarea>
+                        <button type="submit" class="btn btn-primary">Submit Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 댓글 수정 모달 -->
+    <!-- <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="createPostModalLabel"
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -553,7 +594,7 @@
             </div>
         </div> -->
 
-        <!-- 게시글 댓글 확인 모달
+    <!-- 게시글 댓글 확인 모달
         <div class="modal fade" id="allbooksModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -579,16 +620,16 @@
             </div>
         </div> -->
 
-        <!-- 경고 모달 -->
-        <div id="warningModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h2>로그인이 필요합니다.</h2>
-                <button onclick="closeModal()">닫기</button>
-            </div>
+    <!-- 경고 모달 -->
+    <div id="warningModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>로그인이 필요합니다.</h2>
+            <button onclick="closeModal()">닫기</button>
         </div>
+    </div>
 
-        <!-- 댓글 모아 보기 모달 -->
-        <!-- <div id="allbookModal" class="modal" tabindex="-1">
+    <!-- 댓글 모아 보기 모달 -->
+    <!-- <div id="allbookModal" class="modal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -605,326 +646,337 @@
             </div>
         </div> -->
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                //삭제
-                const deleteButtons = document.querySelectorAll('.delete-book-btn');
-                deleteButtons.forEach(function (button) {
-                    button.addEventListener('click', function () {
-                        const bookId = this.getAttribute('data-book-id');
-                        if (confirm('이 댓글을 삭제하시겠습니까?')) {
-                            deleteBook(bookId);
-                        }
-                    });
-                });
-
-                //수정
-                // document.querySelectorAll('.edit-book-btn').forEach(button => {
-                //     button.addEventListener('click', function () {
-                //         const postId = this.getAttribute('data-book-id');
-                //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
-                //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
-                //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
-                //         // 
-                //     });
-                // });
-            });
-
-
-            document.addEventListener('DOMContentLoaded', function () {
-                //삭제
-                const deleteButtons = document.querySelectorAll('.delete-post-btn');
-                deleteButtons.forEach(function (button) {
-                    button.addEventListener('click', function () {
-                        const postId = this.getAttribute('data-post-id');
-                        if (confirm('이 게시물을 삭제하시겠습니까?')) {
-                            deletePost(postId);
-                        }
-                    });
-                });
-
-                //수정
-                // document.querySelectorAll('.edit-post-btn').forEach(button => {
-                //     button.addEventListener('click', function () {
-                //         const postId = this.getAttribute('data-post-id');
-                //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
-                //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
-                //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
-                //         // 
-                //     });
-                // });
-            });
-            // 좋아요 버튼 클릭 시
-            document.querySelectorAll('.like-button').forEach(button => {
-
-                button.addEventListener('click', async (e) => {
-                    const postId = e.currentTarget.dataset.postId;
-                    const response = await fetch(`/addLike/${postId}`, { method: 'POST' });
-
-                    if (response.ok) {
-                        const responseData = await response.json();
-                        const likeCountElement = document.getElementById(`like-count-${postId}`);
-                        if (likeCountElement) {
-                            likeCountElement.textContent = responseData.current_likes;
-                        }
-                        const likeIcon = button.querySelector('.like-icon');
-                        if (likeIcon) {
-                            if (button.classList.contains('liked')) {
-                                likeIcon.textContent = 'favorite_border';
-                                likeIcon.style.color = 'black';
-                                button.classList.remove('liked');
-                            } else {
-                                likeIcon.textContent = 'favorite';
-                                likeIcon.style.color = 'red';
-                                button.classList.add('liked');
-                            }
-                        }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            //삭제
+            const deleteButtons = document.querySelectorAll('.delete-book-btn');
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const bookId = this.getAttribute('data-book-id');
+                    if (confirm('이 댓글을 삭제하시겠습니까?')) {
+                        deleteBook(bookId);
                     }
                 });
             });
 
-            // 모달 열기
-            const modal = document.getElementById("modal-option");
-            const buttonOpenModal = document.getElementById("open-modal");
-            buttonOpenModal.addEventListener("click", e => {
-                modal.style.top = window.pageYOffset + 'px';
-                modal.style.display = "flex";
-                document.body.style.overflowY = "hidden";
+            //수정
+            // document.querySelectorAll('.edit-book-btn').forEach(button => {
+            //     button.addEventListener('click', function () {
+            //         const postId = this.getAttribute('data-book-id');
+            //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+            //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+            //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
+            //         // 
+            //     });
+            // });
+        });
 
+
+        document.addEventListener('DOMContentLoaded', function () {
+            //삭제
+            const deleteButtons = document.querySelectorAll('.delete-post-btn');
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const postId = this.getAttribute('data-post-id');
+                    if (confirm('이 게시물을 삭제하시겠습니까?')) {
+                        deletePost(postId);
+                    }
+                });
             });
-            // 모달 취소 눌러 닫기
-            const buttonCloseModal = document.getElementById("close-modal");
-            buttonCloseModal.addEventListener("click", e => {
+
+            //수정
+            // document.querySelectorAll('.edit-post-btn').forEach(button => {
+            //     button.addEventListener('click', function () {
+            //         const postId = this.getAttribute('data-post-id');
+            //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+            //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+            //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
+            //         // 
+            //     });
+            // });
+        });
+        // 좋아요 버튼 클릭 시
+        document.querySelectorAll('.like-button').forEach(button => {
+
+            button.addEventListener('click', async (e) => {
+                const postId = e.currentTarget.dataset.postId;
+                const response = await fetch(`/addLike/${postId}`, { method: 'POST' });
+
+                if (response.ok) {
+                    const responseData = await response.json();
+                    const likeCountElement = document.getElementById(`like-count-${postId}`);
+                    if (likeCountElement) {
+                        likeCountElement.textContent = responseData.current_likes;
+                    }
+                    const likeIcon = button.querySelector('.like-icon');
+                    if (likeIcon) {
+                        if (button.classList.contains('liked')) {
+                            likeIcon.textContent = 'favorite_border';
+                            likeIcon.style.color = 'black';
+                            button.classList.remove('liked');
+                        } else {
+                            likeIcon.textContent = 'favorite';
+                            likeIcon.style.color = 'red';
+                            button.classList.add('liked');
+                        }
+                    }
+                }
+            });
+        });
+
+        // 모달 열기
+        const modal = document.getElementById("modal-option");
+        const buttonOpenModal = document.getElementById("open-modal");
+        buttonOpenModal.addEventListener("click", e => {
+            modal.style.top = window.pageYOffset + 'px';
+            modal.style.display = "flex";
+            document.body.style.overflowY = "hidden";
+
+        });
+        // 모달 취소 눌러 닫기
+        const buttonCloseModal = document.getElementById("close-modal");
+        buttonCloseModal.addEventListener("click", e => {
+            modal.style.display = "none";
+            document.body.style.overflowY = "visible";
+        });
+        // 모달 아닌곳 눌러 닫기
+        modal.addEventListener("click", e => {
+            const evTarget = e.target
+            if (evTarget.classList.contains("modal-overlay")) {
                 modal.style.display = "none";
                 document.body.style.overflowY = "visible";
-            });
-            // 모달 아닌곳 눌러 닫기
-            modal.addEventListener("click", e => {
-                const evTarget = e.target
-                if (evTarget.classList.contains("modal-overlay")) {
-                    modal.style.display = "none";
-                    document.body.style.overflowY = "visible";
-                }
-            });
-            // 방명록 이벤트
-            // function fn_add_book(userID) {
-            //     document.getElementsByName("person_id")[0].value = userID; // 프로필 ID
-            //     var form = document.getElementById("guestbookForm");
-            //     form.submit();
-            // }
-
-            // 이미지를 미리보기하기 위해 요소 가져오기
-            // var imageUpload = document.getElementById('imageUpload');
-            // var imagePreview = document.getElementById('imagePreview');
-
-            // 이미지를 미리보기하는 함수
-            function previewImage() {
-                var imageUpload = document.getElementById('imageUpload');
-                var imagePreview = document.getElementById('imagePreview');
-                if (imageUpload.files.length > 0) {
-                    var reader = new FileReader();
-                    reader.onload = function () {
-                        imagePreview.src = reader.result;
-                        imagePreview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(imageUpload.files[0]);
-                } else {
-                    imagePreview.style.display = 'none';
-                }
             }
+        });
+        // 방명록 이벤트
+        // function fn_add_book(userID) {
+        //     document.getElementsByName("person_id")[0].value = userID; // 프로필 ID
+        //     var form = document.getElementById("guestbookForm");
+        //     form.submit();
+        // }
 
-            function deleteBook(bookId) {
-                console.log(bookId)
-                fetch(`/book/delete/${bookId}`, {
-                    method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+        // 이미지를 미리보기하기 위해 요소 가져오기
+        // var imageUpload = document.getElementById('imageUpload');
+        // var imagePreview = document.getElementById('imagePreview');
+
+        // 이미지를 미리보기하는 함수
+        function previewImage() {
+            var imageUpload = document.getElementById('imageUpload');
+            var imagePreview = document.getElementById('imagePreview');
+            if (imageUpload.files.length > 0) {
+                var reader = new FileReader();
+                reader.onload = function () {
+                    imagePreview.src = reader.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(imageUpload.files[0]);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        }
+
+        function deleteBook(bookId) {
+            console.log(bookId)
+            fetch(`/book/delete/${bookId}`, {
+                method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
-                            document.querySelector(`#book_${bookId}`).remove();
+                .then(data => {
+                    if (data.success) {
+                        // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
+                        document.querySelector(`#book_${bookId}`).remove();
 
-                        } else {
-                            alert('댓글을 삭제하지 못했습니다.');
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-
-            // function editBook(bookId, new_text) {
-            //     fetch(`/book/edit/${bookId}`, {
-            //         method: 'PATCH',  // PATCH 메소드 사용
-            //         headers: {
-            //             'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
-            //         },
-            //         body: JSON.stringify({ book_text: new_text })  // 수정된 내용을 JSON 문자열로 변환
-            //     })
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             if (data.success) {
-            //                 // 성공적으로 수정되었을 때의 처리 로직
-            //                 alert('Book updated successfully');
-            //                 // 페이지 갱신 또는 수정된 내용을 페이지에 반영
-            //             } else {
-            //                 // 오류 처리
-            //                 alert('Failed to update book');
-            //             }
-            //         })
-            //         .catch(error => console.error('Error:', error));
-            // }
-
-            function editBook(event, bookId) {
-                event.preventDefault(); // 기본 제출 동작 방지
-
-                var form = document.getElementById('edit-form-' + bookId);
-                var new_text = form.querySelector('input[name="book_text"]').value; // 수정된 내용 가져오기
-
-                fetch(`/book/edit/${bookId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ book_text: new_text })
+                    } else {
+                        alert('댓글을 삭제하지 못했습니다.');
+                    }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Book updated successfully');
-                            toggleEditForm(bookId); // 폼 숨기기
-                            // 성공적으로 수정되었을 때의 처리 로직
-                        } else {
-                            alert('Failed to update book');
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
+                .catch(error => console.error('Error:', error));
+        }
 
-            function deletePost(postId) {
-                console.log(postId)
-                fetch(`/posts/delete/${postId}`, {
-                    method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+        // function editBook(bookId, new_text) {
+        //     fetch(`/book/edit/${bookId}`, {
+        //         method: 'PATCH',  // PATCH 메소드 사용
+        //         headers: {
+        //             'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+        //         },
+        //         body: JSON.stringify({ book_text: new_text })  // 수정된 내용을 JSON 문자열로 변환
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 // 성공적으로 수정되었을 때의 처리 로직
+        //                 alert('Book updated successfully');
+        //                 // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+        //             } else {
+        //                 // 오류 처리
+        //                 alert('Failed to update book');
+        //             }
+        //         })
+        //         .catch(error => console.error('Error:', error));
+        // }
+
+        function editBook(event, bookId) {
+            event.preventDefault(); // 기본 제출 동작 방지
+
+            var form = document.getElementById('edit-form-book-' + bookId); // 수정된 부분
+            var new_text = form.querySelector('input[name="book_text"]').value; // 수정된 내용 가져오기
+
+            fetch(`/book/edit/${bookId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ book_text: new_text })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Book updated successfully');
+                        toggleEditForm('book', bookId); // 수정된 부분 - 댓글 수정 폼을 숨기기 위해 toggleEditForm 함수 수정
+                        // 성공적으로 수정되었을 때의 처리 로직
+                    } else {
+                        alert('Failed to update book');
+                    }
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
-                            document.querySelector(`#post_${postId}`).remove();
+                .catch(error => console.error('Error:', error));
+        }
 
-                        } else {
-                            alert('게시물을 삭제하지 못했습니다.');
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            }
-
-            // function editPost(postId, updatedContent) {
-            //     fetch(`/posts/edit/${postId}`, {
-            //         method: 'PATCH',  // PATCH 메소드 사용
-            //         headers: {
-            //             'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
-            //         },
-            //         body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
-            //     })
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             if (data.success) {
-            //                 // 성공적으로 수정되었을 때의 처리 로직
-            //                 alert('Post updated successfully');
-            //                 // 페이지 갱신 또는 수정된 내용을 페이지에 반영
-            //             } else {
-            //                 // 오류 처리
-            //                 alert('Failed to update post');
-            //             }
-            //         })
-            //         .catch(error => console.error('Error:', error));
-            // }
-            function editPost(event, postId) {
-                event.preventDefault(); // 기본 제출 동작 방지
-
-                var form = document.getElementById('edit-form-' + postId);
-                var updated_content = form.querySelector('input[name="content"]').value; // 수정된 내용 가져오기
-
-                fetch(`/posts/edit/${postId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ content: updated_content })
+        function deletePost(postId) {
+            console.log(postId)
+            fetch(`/posts/delete/${postId}`, {
+                method: 'DELETE',  // 이제 DELETE 메소드를 사용합니다
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Post updated successfully');
-                            toggleEditForm(postId); // 폼 숨기기
-                            // 성공적으로 수정되었을 때의 처리 로직
-                        } else {
-                            alert('Failed to update post');
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
+                .then(data => {
+                    if (data.success) {
+                        // 성공적으로 삭제되면, 게시물을 DOM에서 제거합니다.
+                        document.querySelector(`#post_${postId}`).remove();
+
+                    } else {
+                        alert('게시물을 삭제하지 못했습니다.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // function editPost(postId, updatedContent) {
+        //     fetch(`/posts/edit/${postId}`, {
+        //         method: 'PATCH',  // PATCH 메소드 사용
+        //         headers: {
+        //             'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+        //         },
+        //         body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
+        //     })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 // 성공적으로 수정되었을 때의 처리 로직
+        //                 alert('Post updated successfully');
+        //                 // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+        //             } else {
+        //                 // 오류 처리
+        //                 alert('Failed to update post');
+        //             }
+        //         })
+        //         .catch(error => console.error('Error:', error));
+        // }
+        function editPost(event, postId) {
+            event.preventDefault(); // 기본 제출 동작 방지
+
+            var form = document.getElementById('edit-form-post-' + postId); // 수정된 부분
+            var updated_content = form.querySelector('input[name="content"]').value; // 수정된 내용 가져오기
+
+            fetch(`/posts/edit/${postId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: updated_content })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Post updated successfully');
+                        toggleEditForm('post', postId); // 수정된 부분 - 게시글 수정 폼을 숨기기 위해 toggleEditForm 함수 수정
+                        // 성공적으로 수정되었을 때의 처리 로직
+                    } else {
+                        alert('Failed to update post');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+        // 댓글 게시 함수
+        function submitComment() {
+
+            var userID = "{{ current_user.id }}"; // 현재 사용자의 ID 가져오기
+
+            // 사용자가 로그인되어 있는지 확인
+            if (userID) {
+                var form = document.getElementById("guestbookForm");
+                form.submit();
+            } else {
+                // 로그인 모달 표시
+                document.getElementById("warningModal").style.display = "block";
             }
+        }
+        // 모달 닫기 함수
+        function closeModal() {
+            document.getElementById("warningModal").style.display = "none";
+        }
 
-            // 댓글 게시 함수
-            function submitComment() {
-
-                var userID = "{{ current_user.id }}"; // 현재 사용자의 ID 가져오기
-
-                // 사용자가 로그인되어 있는지 확인
-                if (userID) {
-                    var form = document.getElementById("guestbookForm");
-                    form.submit();
-                } else {
-                    // 로그인 모달 표시
-                    document.getElementById("warningModal").style.display = "block";
-                }
-            }
-            // 모달 닫기 함수
-            function closeModal() {
-                document.getElementById("warningModal").style.display = "none";
-            }
-
-            function toggleEditForm(book_id) {
-                var form = document.getElementById('edit-form-' + book_id);
+        function toggleEditForm(type, id) {
+            var form = document.getElementById(`edit-form-${type}-${id}`);
+            if (form) {
                 form.style.display = form.style.display === 'none' ? 'block' : 'none';
             }
-            // function allbook(){
-            //     document.getElementById("allbookModal").style.display = "block";
-            // }
+        }
+
+        function toggleEditBookForm(book_id) {
+            toggleEditForm('book', book_id);
+        }
+
+        function toggleEditPostForm(post_id) {
+            toggleEditForm('post', post_id);
+        }
+        // function allbook(){
+        //     document.getElementById("allbookModal").style.display = "block";
+        // }
 
 
-        </script>
+    </script>
 
-        <!-- Option 1: Bootstrap Bundle with Popper -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-            crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
-        <!-- Option 2: Separate Popper and Bootstrap JS -->
-        <!--
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
 -->
-        <canvas id="blossomCanvas"></canvas>
-        <script src="{{ url_for('static', filename='blossom.js') }}"></script>
+    <canvas id="blossomCanvas"></canvas>
+    <script src="{{ url_for('static', filename='blossom.js') }}"></script>
 
-        <footer class="cherry-blossom-footer">
-            <!-- 푸터 내용, 필요한 경우 -->
-        </footer>
+    <footer class="cherry-blossom-footer">
+        <!-- 푸터 내용, 필요한 경우 -->
+    </footer>
 </body>
 
 </html>
