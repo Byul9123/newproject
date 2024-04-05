@@ -234,6 +234,21 @@ def add_book():
         
         return redirect(url_for('home'))
 
+# 댓글 수정
+@app.route("/book/edit/<int:book_id>", methods=['PATCH'])
+def edit_book(book_id):
+    data = request.get_json()
+    updated_book_text = data.get('book_text')
+    book = Book.query.get(book_id)
+    if book:
+        book.book_text = updated_book_text
+        db.session.commit()
+        return jsonify({"success": "Book updated successfully"}), 200
+
+    else:
+        return jsonify({"error": "Book not found"}), 404
+
+
 # 댓글 삭제
 @app.route("/book/delete/<int:book_id>", methods=["DELETE"])
 def book_delete(book_id):
@@ -251,7 +266,6 @@ def book_delete(book_id):
 def edit_post(post_id):
     data = request.get_json()
     updated_content = data.get('content')
-    print("edit NOW", post_id)
     post = Post.query.get(post_id)
     if post:
         post.content = updated_content
@@ -259,6 +273,7 @@ def edit_post(post_id):
         return jsonify({"success": "Post updated successfully"}), 200
     else:
         return jsonify({"error": "Post not found"}), 404
+    
 
 
 # 좋아요 기능 구현

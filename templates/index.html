@@ -242,7 +242,8 @@
         style="position: fixed; display: flex; flex-direction: row; width: 100%; border-bottom: solid 1px #dbdbdb; background-color: #ffffff;z-index: 1;">
         <div class="container-fluid" style="justify-content: space-between; flex-wrap: nowrap; max-width: 940px;">
             <!--        instagram 이미지-------------------------------------------------------------------------------->
-            <a class="navbar-brand" href="../mainpage/instamain.html"><img style="width: 100px;"
+            <!-- 수정 필요: 홈버튼 -->
+            <a class="navbar-brand" href="/"><img style="width: 100px;"
                     src="https://nbcamp.spartacodingclub.kr/_next/static/media/newLogo.a1d35235.svg">
             </a>
             <!--            검색창-------------------------------------------------------------------------------------->
@@ -251,7 +252,8 @@
             <div style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
                 <!--            아이콘---------------------------------------------------------------------------------->
                 {% if current_user.is_authenticated %}
-                <a href="/posts/create"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
+                <!-- 수정 필요: 홈버튼 -->
+                <a href="/"><span style="margin: 6px 12px 0 12px;" class="material-icons">home</span></a>
                 <span style="margin: 0 12px 0 12px; cursor: pointer;" class="material-icons-outlined"
                     data-bs-toggle="modal" data-bs-target="#createPostModal">add_box</span>
                 <!--좋아요 누른 게시글 확인 아이콘-->
@@ -298,7 +300,7 @@
                     <div>
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
                             <span class="material-icons-outlined" style="margin-right: 15px;"
-                                data-post-id="{{ post.id }}">edit</span>
+                                data-post-id="{{ post.id }}" onclick="toggleEditForm('{{ post.id }}')">edit</span>
                             <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
                                 data-post-id="{{ post.id }}">delete</span>
 
@@ -307,6 +309,16 @@
                 </div>
                 <!-- 포스트 내용 -->
                 <div style="margin-left: 10px;">
+                    {% if post.image_path %}
+                    <div class="post-container">
+                        <!-- 이미지 경로가 존재하는 경우 이미지 표시 -->
+                        <!-- 이미지 파일이 static/uploads에 미리 들어있는 경우에만 사진 보임. -->
+                        <a href="/profile"><img class="profile" style="margin-bottom: 6px;"
+                                src="{{ url_for('static', filename = 'uploads/' + post.image_path) }}"></a>
+                    </div>
+                    <!-- 이미지가 업로드되었다면 이미지 표시 -->
+                    {% endif %}
+
                     <div>
                         {% if post.id in likes %}
                         <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}">
@@ -321,6 +333,11 @@
                         Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
                         <br>
                         {{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}
+                            <form class="edit-form" id="edit-form-{{ post.id }}"
+                                onsubmit="editPost(event, '{{ post.id }}')" style="display: none;">
+                                <input type="text" name="content" placeholder="게시글 수정 내용">
+                                <input type="submit" value="저장">
+                            </form>
                     </div>
                     <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
                 </div> -->
@@ -338,16 +355,45 @@
                     </div>
                 </div>
                 <br>
-                {% for book in books %}
+                <!-- {% for book in books %}
                 {% if post.id == book.post_id %}
-                    {% for user1 in user %}
-                    {% if user1.id == book.userID %}
-                    {{ user1.username }} {{ book.book_text }} <span class="delete-book-btn" style="font-weight: 300; cursor: pointer;" data-book-id="{{ book.book_id }}">삭제</span>
-                    <br>
-                    {% endif %}
-                    {% endfor %}
+                {% for user1 in user %}
+                {% if user1.id == book.userID %}
+                {{ user1.username }} {{ book.book_text }} <span class="edit-book-btn"
+                    style="font-weight: 300; cursor: pointer;" data-bookid="{{ book.book_id }}"
+                    onclick="toggleEditForm('{{ book.book_id }}')">수정</span> |
+                <span class="delete-book-btn" style="font-weight: 300; cursor: pointer;"
+                    data-book-id="{{ book.book_id }}">삭제</span>
+                <form class="edit-form" id="edit-form-{{ book.book_id }}" action="/book/edit/{{ book.book_id }}"
+                    method="post" style="display: none;">
+                    <input type="text" name="new_text" placeholder="댓글 수정 내용">
+                    <input type="submit" value="저장">
+                </form>
+                <br>
                 {% endif %}
                 {% endfor %}
+                {% endif %}
+                {% endfor %} -->
+                {% for book in books %}
+                {% if post.id == book.post_id %}
+                {% for user1 in user %}
+                {% if user1.id == book.userID %}
+                {{ user1.username }} {{ book.book_text }}
+                <span class="edit-book-btn" style="font-weight: 300; cursor: pointer;" data-bookid="{{ book.book_id }}"
+                    onclick="toggleEditForm('{{ book.book_id }}')">수정</span> |
+                <span class="delete-book-btn" style="font-weight: 300; cursor: pointer;"
+                    data-book-id="{{ book.book_id }}">삭제</span>
+                <form class="edit-form" id="edit-form-{{ book.book_id }}"
+                    onsubmit="editBook(event, '{{ book.book_id }}')" style="display: none;">
+                    <input type="text" name="book_text" placeholder="댓글 수정 내용">
+                    <input type="submit" value="저장">
+                </form>
+                <br>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+
             </div>
 
             {% endfor %}
@@ -470,6 +516,33 @@
             </div>
         </div>
 
+        <!-- 댓글 수정 모달 -->
+        <!-- <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="createPostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPostModalLabel">Create a Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="imagePreviewContainer">
+                            <img id="imagePreview" src="#" alt="Image Preview" style="display: none;">
+                        </div>
+                        <form id="postForm" action="/posts/create" method="POST" enctype="multipart/form-data">
+                            <input type="file" id="imageUpload" name="imageUpload"
+                                accept="image/jpeg,image/gif,image/png" style="display: none;"
+                                onchange="previewImage()">
+                            <label for="imageUpload" class="btn btn-primary">Upload Image</label>
+                            <textarea name="content" id="postContent" class="form-control"
+                                placeholder="What's on your mind?" rows="3"></textarea>
+                            <button type="submit" class="btn btn-primary">Submit Post</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
         <!-- 게시글 댓글 확인 모달
         <div class="modal fade" id="allbooksModal" tabindex="-1" aria-labelledby="likedPostsModalLabel"
             aria-hidden="true">
@@ -536,9 +609,9 @@
                 });
 
                 //수정
-                // document.querySelectorAll('.edit-post-btn').forEach(button => {
+                // document.querySelectorAll('.edit-book-btn').forEach(button => {
                 //     button.addEventListener('click', function () {
-                //         const postId = this.getAttribute('data-post-id');
+                //         const postId = this.getAttribute('data-book-id');
                 //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
                 //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
                 //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
@@ -561,15 +634,15 @@
                 });
 
                 //수정
-                document.querySelectorAll('.edit-post-btn').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const postId = this.getAttribute('data-post-id');
-                        // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
-                        // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
-                        // 'Submit' 버튼 클릭 시 editPost 함수 호출
-                        // 
-                    });
-                });
+                // document.querySelectorAll('.edit-post-btn').forEach(button => {
+                //     button.addEventListener('click', function () {
+                //         const postId = this.getAttribute('data-post-id');
+                //         // TODO : 수정 폼을 표시하는 로직 (이미지 삭제 , 불러오기)
+                //         // 예를 들어, 수정 폼에 현재 내용을 불러와 채우고, 'Submit' 생성
+                //         // 'Submit' 버튼 클릭 시 editPost 함수 호출
+                //         // 
+                //     });
+                // });
             });
             // 좋아요 버튼 클릭 시
             document.querySelectorAll('.like-button').forEach(button => {
@@ -671,6 +744,54 @@
                     .catch(error => console.error('Error:', error));
             }
 
+            // function editBook(bookId, new_text) {
+            //     fetch(`/book/edit/${bookId}`, {
+            //         method: 'PATCH',  // PATCH 메소드 사용
+            //         headers: {
+            //             'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+            //         },
+            //         body: JSON.stringify({ book_text: new_text })  // 수정된 내용을 JSON 문자열로 변환
+            //     })
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             if (data.success) {
+            //                 // 성공적으로 수정되었을 때의 처리 로직
+            //                 alert('Book updated successfully');
+            //                 // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+            //             } else {
+            //                 // 오류 처리
+            //                 alert('Failed to update book');
+            //             }
+            //         })
+            //         .catch(error => console.error('Error:', error));
+            // }
+
+            function editBook(event, bookId) {
+                event.preventDefault(); // 기본 제출 동작 방지
+
+                var form = document.getElementById('edit-form-' + bookId);
+                var new_text = form.querySelector('input[name="book_text"]').value; // 수정된 내용 가져오기
+
+                fetch(`/book/edit/${bookId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ book_text: new_text })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Book updated successfully');
+                            toggleEditForm(bookId); // 폼 숨기기
+                            // 성공적으로 수정되었을 때의 처리 로직
+                        } else {
+                            alert('Failed to update book');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
             function deletePost(postId) {
                 console.log(postId)
                 fetch(`/posts/delete/${postId}`, {
@@ -694,28 +815,52 @@
                     .catch(error => console.error('Error:', error));
             }
 
-            function editPost(postId, updatedContent) {
+            // function editPost(postId, updatedContent) {
+            //     fetch(`/posts/edit/${postId}`, {
+            //         method: 'PATCH',  // PATCH 메소드 사용
+            //         headers: {
+            //             'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+            //         },
+            //         body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
+            //     })
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             if (data.success) {
+            //                 // 성공적으로 수정되었을 때의 처리 로직
+            //                 alert('Post updated successfully');
+            //                 // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+            //             } else {
+            //                 // 오류 처리
+            //                 alert('Failed to update post');
+            //             }
+            //         })
+            //         .catch(error => console.error('Error:', error));
+            // }
+            function editPost(event, postId) {
+                event.preventDefault(); // 기본 제출 동작 방지
+
+                var form = document.getElementById('edit-form-' + postId);
+                var updated_content = form.querySelector('input[name="content"]').value; // 수정된 내용 가져오기
+
                 fetch(`/posts/edit/${postId}`, {
-                    method: 'PATCH',  // PATCH 메소드 사용
+                    method: 'PATCH',
                     headers: {
-                        'Content-Type': 'application/json'  // 요청 본문이 JSON 형식임을 명시
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ content: updatedContent })  // 수정된 내용을 JSON 문자열로 변환
+                    body: JSON.stringify({ content: updated_content })
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // 성공적으로 수정되었을 때의 처리 로직
                             alert('Post updated successfully');
-                            // 페이지 갱신 또는 수정된 내용을 페이지에 반영
+                            toggleEditForm(postId); // 폼 숨기기
+                            // 성공적으로 수정되었을 때의 처리 로직
                         } else {
-                            // 오류 처리
                             alert('Failed to update post');
                         }
                     })
                     .catch(error => console.error('Error:', error));
             }
-
 
             // 댓글 게시 함수
             function submitComment() {
@@ -736,6 +881,10 @@
                 document.getElementById("warningModal").style.display = "none";
             }
 
+            function toggleEditForm(book_id) {
+                var form = document.getElementById('edit-form-' + book_id);
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
             // function allbook(){
             //     document.getElementById("allbookModal").style.display = "block";
             // }
