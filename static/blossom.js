@@ -51,7 +51,7 @@ class BlossomItem {
 document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById('blossomCanvas');
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = document.body.scrollHeight; // 수정
     const blossoms = [];
     const count = 150;
 

@@ -65,13 +65,6 @@
         margin-top: 5px;
     }
 
-    /*피드박스 좌측 상단 미니프로필*/
-    .box-profile {
-        width: 30px;
-        height: 30px;
-        border-radius: 70%;
-        overflow: hidden;
-    }
 
     /*프로필사진들*/
     .profile {
@@ -125,10 +118,30 @@
 
     /*피드 박스*/
     .feed-box {
-        border: solid 1px #dbdbdb;
-        border-radius: 2px;
-        margin-top: 30px;
-        background-color: white;
+        background-color: #FFFFFF;
+        width: 25rem;
+        height: 35rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        box-shadow: 0.063rem 0.5rem 1.25rem hsl(0deg 0% 0% / 12.16%);
+        border-radius: 0.5rem;
+        margin: 1rem;
+        overflow: hidden;
+    }
+    .post-container {
+        width: 100%;
+        height: auto;
+        margin-top: 25px;
+        clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+        object-fit: cover;
+    }
+    .post-container img {
+        margin-top: -5%;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
     }
 
     /*추천회원*/
@@ -143,6 +156,25 @@
         color: black;
     }
 
+    .logo {
+        color: #000;
+        font-family: "Raleway", sans-serif;
+        font-weight: 700;
+        font-size: 1.4rem;
+        line-height: 1.4;
+        margin-bottom: 0.425rem;
+        text-transform: capitalize;
+        letter-spacing: 0.02rem;
+    }
+    p {
+        color: #000;
+        line-height: 1.6;
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
 
     @keyframes showText1 {
         from {
@@ -209,9 +241,27 @@
     }
 
 
+    svg {
+        position: relative;
+        display: block;
+        width: calc(300% + 1.3px);
+        height: 5rem;
+        transform: rotateY(180deg);
+    }
+    .shape-fill {
+        fill: #FFFFFF;
+    }
+    #imagePreview {
+        max-width: 100%;
+        /* 이미지의 최대 너비를 부모 요소의 너비에 맞게 설정 */
+        max-height: 100%;
+        /* 이미지의 최대 높이를 부모 요소의 높이에 맞게 설정 */
+        height: auto;
+        /* 이미지의 높이를 자동으로 조정하여 비율을 유지함 */
+    }
     /* 벚꽃 */
     .blossom-canvas {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
@@ -219,7 +269,6 @@
         z-index: -1;
         pointer-events: none;
     }
-
     .cherry-blossom-footer {
         position: fixed;
         left: 0;
@@ -230,7 +279,6 @@
         background: url('../static/image/footerBG.png') no-repeat center bottom;
         background-size: cover;
         z-index: -1;
-        /* 필요에 따라 조정 */
     }
 </style>
 
@@ -280,64 +328,54 @@
     <div style="display: flex; flex-direction: row; position: relative; justify-content: center; top: 85px;">
         <!----------------왼 쪽메인화면창--------------------------------------------------------------------------------->
         <div class="cLayer"
-            style="max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: absolute; font-size: 13px; font-weight: bold;">
+            style="left: 35%; max-width: 600px; width: 100%; max-height: 3000px; height: 100%; position: absolute; font-size: 13px; font-weight: bold;">
             <!-- 포스트 목록 반복 -->
             {% for post in posts %}
             <div class="feed-box" id="post_{{ post.id }}">
                 <!-- 포스트 상단 정보 -->
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; margin-top: 2%; margin-left: 1%; margin-bottom: 2%;">
-                    <div style="display: flex; align-items: center">
-                        <div class="box-profile">
-                            <!-- 프로필 이미지 주소가 있다면 아래 img src에 넣어주세요. -->
-                            <!-- <a href="#"><img class="profile" src="{{ post.user.profile_image }}"></a> -->
-                        </div>
-                        <div style="margin-left: 10px">
-                            <!-- 사용자 이름 표시 -->
-                            {{ post.user.username }}
+                <div style="display: inline-block; z-index: 5; margin-left: 10px; margin-bottom: -8%;">
+                    <div style="float: left;">
+                        <div>
+                            <h2 class="logo">{{ post.user.username }}</h2>
                         </div>
                     </div>
-                    <div>
+                    <div style="float: right;">
                         <button id="open-modal" class="btn-open-popup" style="border: none; background-color: white;">
-                            <span class="material-icons-outlined" style="margin-right: 15px;"
-                                data-post-id="{{ post.id }}" onclick="toggleEditForm('{{ post.id }}')">edit</span>
+                            <span class="material-icons-outlined edit-post-btn" style="margin-right: 15px;"
+                                data-bs-toggle="modal" data-bs-target="#editPostModal"
+                                data-post-id="{{ post.id }}">edit</span>
                             <span class="material-icons-outlined delete-post-btn" style="cursor: pointer;"
                                 data-post-id="{{ post.id }}">delete</span>
-
                         </button>
                     </div>
                 </div>
-                <!-- 포스트 내용 -->
-                <div style="margin-left: 10px;">
-                    {% if post.image_path %}
-                    <div class="post-container">
-                        <!-- 이미지 경로가 존재하는 경우 이미지 표시 -->
-                        <!-- 이미지 파일이 static/uploads에 미리 들어있는 경우에만 사진 보임. -->
-                        <a href="/profile"><img class="profile" style="margin-bottom: 6px;"
-                                src="{{ url_for('static', filename = 'uploads/' + post.image_path) }}"></a>
-                    </div>
-                    <!-- 이미지가 업로드되었다면 이미지 표시 -->
+                <!-- 이미지 내용 -->
+                {% if post.image_path %}
+                <div class="post-container">
+                    <!-- 이미지 경로가 존재하는 경우 이미지 표시 -->
+                    <img src="{{ url_for('static', filename='uploads/' + post.image_path) }}" alt="Post Image">
+                </div>
+                {% endif %}
+                <div style="font-size: 10px;">
+                    {% if post.id in likes %}
+                    <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}" style="width: 20px;">
+                        <span class="material-icons-outlined like-icon" style="color: red;">favorite {{ post.likes
+                            }}</span>
+                    </button>
+                    <span id="like-count-{{ post.id }}">{{ post.likes }}</span>
+                    {% else %}
+                    <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
+                        <span class="material-icons-outlined like-icon" style="color: black;">favorite_border {{
+                            post.likes }}</span>
+                    </button>
+                    <span id="like-count-{{ post.id }}">{{ post.likes }}</span>
                     {% endif %}
-
+                    <br>
+                </div>
+                <!-- 컨텐츠 내용 -->
+                <div style="margin-left: 10px;">
                     <div>
-                        {% if post.id in likes %}
-                        <button class="like-button btn btn-link liked" data-post-id="{{ post.id }}">
-                            <span class="material-icons-outlined like-icon" style="color: red;">favorite</span>
-                        </button>
-                        {% else %}
-                        <button class="like-button btn btn-link" data-post-id="{{ post.id }}">
-                            <span class="material-icons-outlined like-icon" style="color: black;">favorite_border</span>
-                        </button>
-                        {% endif %}
-                        <br>
-                        Likes:&nbsp;<span id="like-count-{{ post.id }}">{{ post.likes }}</span>
-                        <br>
-                        {{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}
-                            <form class="edit-form" id="edit-form-{{ post.id }}"
-                                onsubmit="editPost(event, '{{ post.id }}')" style="display: none;">
-                                <input type="text" name="content" placeholder="게시글 수정 내용">
-                                <input type="submit" value="저장">
-                            </form>
+                        <p>{{ post.content }}</p>
                     </div>
                     <!-- <div>{{ post.user.username }}&nbsp;<span style="font-weight: lighter">{{ post.content }}</span>
                 </div> -->
@@ -355,48 +393,20 @@
                     </div>
                 </div>
                 <br>
-                <!-- {% for book in books %}
-                {% if post.id == book.post_id %}
-                {% for user1 in user %}
-                {% if user1.id == book.userID %}
-                {{ user1.username }} {{ book.book_text }} <span class="edit-book-btn"
-                    style="font-weight: 300; cursor: pointer;" data-bookid="{{ book.book_id }}"
-                    onclick="toggleEditForm('{{ book.book_id }}')">수정</span> |
-                <span class="delete-book-btn" style="font-weight: 300; cursor: pointer;"
-                    data-book-id="{{ book.book_id }}">삭제</span>
-                <form class="edit-form" id="edit-form-{{ book.book_id }}" action="/book/edit/{{ book.book_id }}"
-                    method="post" style="display: none;">
-                    <input type="text" name="new_text" placeholder="댓글 수정 내용">
-                    <input type="submit" value="저장">
-                </form>
-                <br>
-                {% endif %}
-                {% endfor %}
-                {% endif %}
-                {% endfor %} -->
                 {% for book in books %}
                 {% if post.id == book.post_id %}
                 {% for user1 in user %}
                 {% if user1.id == book.userID %}
-                {{ user1.username }} {{ book.book_text }}
-                <span class="edit-book-btn" style="font-weight: 300; cursor: pointer;" data-bookid="{{ book.book_id }}"
-                    onclick="toggleEditForm('{{ book.book_id }}')">수정</span> |
-                <span class="delete-book-btn" style="font-weight: 300; cursor: pointer;"
-                    data-book-id="{{ book.book_id }}">삭제</span>
-                <form class="edit-form" id="edit-form-{{ book.book_id }}"
-                    onsubmit="editBook(event, '{{ book.book_id }}')" style="display: none;">
-                    <input type="text" name="book_text" placeholder="댓글 수정 내용">
-                    <input type="submit" value="저장">
-                </form>
+                {{ user1.username }} {{ book.book_text }} <span class="delete-book-btn"
+                    style="font-weight: 300; cursor: pointer;" data-book-id="{{ book.book_id }}">삭제</span>
                 <br>
                 {% endif %}
                 {% endfor %}
                 {% endif %}
                 {% endfor %}
-
             </div>
-
             {% endfor %}
+        </div>
 
         </div>
 
@@ -704,11 +714,13 @@
             // }
 
             // 이미지를 미리보기하기 위해 요소 가져오기
-            var imageUpload = document.getElementById('imageUpload');
-            var imagePreview = document.getElementById('imagePreview');
+            // var imageUpload = document.getElementById('imageUpload');
+            // var imagePreview = document.getElementById('imagePreview');
 
             // 이미지를 미리보기하는 함수
             function previewImage() {
+                var imageUpload = document.getElementById('imageUpload');
+                var imagePreview = document.getElementById('imagePreview');
                 if (imageUpload.files.length > 0) {
                     var reader = new FileReader();
                     reader.onload = function () {
