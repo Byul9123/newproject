@@ -24,15 +24,14 @@
 ***
 5. api
   =URL	                      API명
-  /register		                GET, POST	
-  /login		                  GET, POST
-  /posts/create		            GET, POST
-  /posts/delete/int:post_id		DELETE	
-  /addBook		                POST	
-  /book/edit/<int:book_id>		PATCH	
-  /book/delete/<int:book_id>	DELETE	
-
-  /addLike/int:post_id		    POST
+  =/register		                GET, POST
+  =/login		                  GET, POST
+  =/posts/create		            GET, POST
+  =/posts/delete/int:post_id		DELETE	
+  =/addBook		                POST	
+  =/book/edit/<int:book_id>		PATCH	
+  =/book/delete/<int:book_id>	DELETE	
+  =/addLike/int:post_id		    POST
 
 ***
 
