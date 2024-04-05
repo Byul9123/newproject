@@ -23,11 +23,12 @@
   
 ***
 5. api
-URL	                      API명
+   
+URL                         API명
 
-/register		                GET, POST
+/register                   GET, POST
 
-/login		                  GET, POST
+/login                      GET, POST
 
 /posts/create		            GET, POST
 
